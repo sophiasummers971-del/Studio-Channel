@@ -66,4 +66,37 @@ assert.match(main, /AuthGate/,
 assert.doesNotMatch(main, /PasswordGate/,
   'client-side password gate must not be the production trust boundary');
 
+assert.ok(
+  existsSync('supabase/functions/_shared/requireOperator.ts'),
+  'shared Edge Function operator authorization helper must exist'
+);
+const operatorAuth = existsSync('supabase/functions/_shared/requireOperator.ts')
+  ? read('supabase/functions/_shared/requireOperator.ts')
+  : '';
+assert.match(operatorAuth, /studio_operators/,
+  'Edge Function authorization must verify Studio operator membership');
+
+const publishPin = read('supabase/functions/publish-pin/index.ts');
+const generateContent = read('supabase/functions/generate-content/index.ts');
+assert.match(authStart, /requireOperator/,
+  'auth_start must require an authorized Studio operator');
+assert.match(publishPin, /requireOperator/,
+  'publish-pin must require an authorized Studio operator');
+assert.match(generateContent, /requireOperator/,
+  'generate-content must require an authorized Studio operator');
+assert.match(authCallback, /user_id/,
+  'OAuth callback must bind state to the operator who started the flow');
+assert.match(hook, /functions\.invoke\(['"]auth_start['"]/,
+  'browser must start OAuth through authenticated Edge Function invocation');
+
+const functionConfig = read('supabase/config.toml');
+assert.match(functionConfig, /\[functions\.auth_start\][\s\S]*verify_jwt\s*=\s*true/,
+  'auth_start must require JWT verification');
+assert.match(functionConfig, /\[functions\.auth_callback\][\s\S]*verify_jwt\s*=\s*false/,
+  'auth_callback must remain callable by provider redirect and rely on one-time state');
+assert.match(functionConfig, /\[functions\."?publish-pin"?\][\s\S]*verify_jwt\s*=\s*true/,
+  'publish-pin must require JWT verification');
+assert.match(functionConfig, /\[functions\."?generate-content"?\][\s\S]*verify_jwt\s*=\s*true/,
+  'generate-content must require JWT verification');
+
 console.log('security contract: PASS');
