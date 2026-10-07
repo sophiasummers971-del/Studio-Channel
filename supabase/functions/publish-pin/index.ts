@@ -140,7 +140,7 @@ async function findOrCreateBoard(
   const first = await createPinterestBoard(apiBaseUrl, accessToken, boardName);
   if (first.id) return first.id;
 
-  const isSandbox = apiBaseUrl.includes("api-sandbox.pinterest.com");
+  const isSandbox = apiBaseUrl === "https://api-sandbox.pinterest.com";
   if (isSandbox && first.code === 58) {
     const suffix = new Date().toISOString().replace(/[-:.TZ]/g, "").slice(0, 14);
     const fallbackName = `${boardName} Sandbox ${suffix}`;
@@ -349,6 +349,7 @@ serve(async (req: Request) => {
         published_at: new Date().toISOString(),
         external_id: result.id,
         external_url: result.link,
+        error_message: null,
       })
       .eq("id", jobId);
 
