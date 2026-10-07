@@ -145,18 +145,35 @@ assert.match(authCallback, /api\.linkedin\.com\/v2\/userinfo/,
 assert.match(authCallback, /ig_exchange_token/,
   'Instagram short-lived token must be upgraded server-side before storage');
 
-assert.match(generateContent, /\/v1\/responses/,
-  'AI generation must use the current Responses API');
-assert.doesNotMatch(generateContent, /\/v1\/chat\/completions/,
-  'legacy Chat Completions call must be removed from Studio generator');
-assert.match(generateContent, /OPENAI_MODEL/,
-  'AI model must be configurable server-side');
-assert.match(generateContent, /gpt-6-luna/,
-  'cost-sensitive current model must be the default');
-assert.match(generateContent, /json_schema/,
-  'AI output must use Structured Outputs JSON schema');
-assert.match(generateContent, /strict:\s*true/,
-  'AI output schema must use strict mode');
+assert.match(generateContent, /studio-ai-gateway\.s-jade0131\.workers\.dev\/generate/,
+  'AI generation must route through the dedicated Cloudflare AI gateway');
+assert.doesNotMatch(generateContent, /api\.openai\.com|OPENAI_API_KEY|OPENAI_MODEL/,
+  'Supabase generate-content must not call OpenAI directly');
+
+assert.ok(
+  existsSync('cloudflare/studio-ai-gateway/worker.js'),
+  'Cloudflare AI gateway source must be tracked in the repository'
+);
+assert.ok(
+  existsSync('cloudflare/studio-ai-gateway/wrangler.toml'),
+  'Cloudflare AI gateway Wrangler config must be tracked in the repository'
+);
+const aiWorker = read('cloudflare/studio-ai-gateway/worker.js');
+const aiWorkerConfig = read('cloudflare/studio-ai-gateway/wrangler.toml');
+assert.match(aiWorker, /env\.AI\.run/,
+  'Cloudflare AI gateway must use the Workers AI binding');
+assert.match(aiWorker, /@cf\/meta\/llama-3\.3-70b-instruct-fp8-fast/,
+  'Cloudflare AI gateway must use the verified JSON-capable model');
+assert.match(aiWorker, /response_format:\{type:"json_schema"/,
+  'Cloudflare AI gateway must request structured JSON output');
+assert.match(aiWorker, /studio_operators/,
+  'Cloudflare AI gateway must verify Studio operator membership');
+assert.match(aiWorker, /items\.length!==count/,
+  'Cloudflare AI gateway must reject incomplete generated content sets');
+assert.match(aiWorkerConfig, /\[ai\][\s\S]*binding\s*=\s*"AI"/,
+  'Wrangler config must bind Workers AI as AI');
+assert.match(aiWorkerConfig, /\[observability\][\s\S]*enabled\s*=\s*true/,
+  'Cloudflare AI gateway observability must remain enabled');
 
 assert.ok(
   existsSync('supabase/functions/_shared/pinterestCredentials.ts'),
