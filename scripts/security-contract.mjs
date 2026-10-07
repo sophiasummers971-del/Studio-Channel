@@ -141,4 +141,24 @@ assert.match(generateContent, /json_schema/,
 assert.match(generateContent, /strict:\s*true/,
   'AI output schema must use strict mode');
 
+assert.ok(
+  existsSync('supabase/functions/_shared/pinterestCredentials.ts'),
+  'Pinterest credential lifecycle helper must exist'
+);
+const pinterestCredentials = existsSync('supabase/functions/_shared/pinterestCredentials.ts')
+  ? read('supabase/functions/_shared/pinterestCredentials.ts')
+  : '';
+assert.match(authCallback, /Authorization:\s*`Basic/,
+  'Pinterest authorization-code exchange must use HTTP Basic app authentication');
+assert.match(authCallback, /refresh_token_expires_at/,
+  'Pinterest refresh-token expiry must be persisted');
+assert.match(pinterestCredentials, /grant_type.*refresh_token/s,
+  'Pinterest helper must refresh access tokens server-side');
+assert.match(pinterestCredentials, /Authorization:\s*`Basic/,
+  'Pinterest refresh must use HTTP Basic app authentication');
+assert.match(pinterestCredentials, /oauth_credentials/,
+  'Pinterest refreshed credentials must stay in server-only storage');
+assert.match(publishPin, /getPinterestAccessToken/,
+  'Pinterest publishing must obtain a current access token through the lifecycle helper');
+
 console.log('security contract: PASS');
