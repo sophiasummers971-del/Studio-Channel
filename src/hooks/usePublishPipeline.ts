@@ -14,6 +14,7 @@ interface DbContentRow {
   output: Record<string, unknown> | null;
   created_at: string;
   updated_at: string;
+  media_asset_id: string | null;
 }
 
 interface DbPublishRow {
@@ -45,6 +46,7 @@ function mapContent(row: DbContentRow): ContentItem {
     output: (row.output as ContentItem['output']) || {},
     createdAt: row.created_at,
     updatedAt: row.updated_at,
+    mediaAssetId: row.media_asset_id ?? null,
   };
 }
 
@@ -152,6 +154,126 @@ export function usePublishPipeline() {
     await loadData();
   }, [loadData]);
 
+  const uploadMedia = useCallback(async (item: ScheduledContent, file: File) => {
+    const allowedTypes = new Set(['image/jpeg', 'image/png', 'image/webp']);
+    if (!allowedTypes.has(file.type)) {
+      throw new Error('Use a JPEG, PNG, or WebP image.');
+    }
+    if (file.size > 10 * 1024 * 1024) {
+      throw new Error('Image must be 10 MB or smaller.');
+    }
+
+    const { data: userData, error: userError } = await supabase.auth.getUser();
+    if (userError || !userData.user) throw new Error('Authenticated Studio session required.');
+
+    const ext = (file.name.split('.').pop() || 'jpg').toLowerCase().replace(/[^a-z0-9]/g, '') || 'jpg';
+    const now = new Date();
+    const yyyy = now.getUTCFullYear();
+    const mm = String(now.getUTCMonth() + 1).padStart(2, '0');
+    const dd = String(now.getUTCDate()).padStart(2, '0');
+    const storagePath = `${item.platform}/${yyyy}/${mm}/${dd}/${item.id}-${crypto.randomUUID()}.${ext}`;
+    const bucket = 'studio-media-public';
+
+    const { error: uploadError } = await supabase.storage
+      .from(bucket)
+      .upload(storagePath, file, {
+        cacheControl: '3600',
+        upsert: false,
+        contentType: file.type || undefined,
+      });
+
+    if (uploadError) throw uploadError;
+
+    const { data: publicUrlData } = supabase.storage.from(bucket).getPublicUrl(storagePath);
+    const publicUrl = publicUrlData.publicUrl;
+
+    const { data: asset, error: assetError } = await supabase
+      .from('media_assets')
+      .insert({
+        uploaded_by: userData.user.id,
+        content_id: item.id,
+        platform: item.platform,
+        content_type: file.type || 'application/octet-stream',
+        file_name: file.name,
+        file_size: file.size,
+        storage_bucket: bucket,
+        storage_path: storagePath,
+        public_url: publicUrl,
+        alt_text: typeof item.output.altText === 'string' ? item.output.altText : null,
+        label: item.title,
+      })
+      .select('id')
+      .single();
+
+    if (assetError || !asset) {
+      await supabase.storage.from(bucket).remove([storagePath]);
+      throw assetError || new Error('Could not create media asset record.');
+    }
+
+    const nextOutput = { ...(item.output || {}), mediaUrl: publicUrl };
+    const { error: contentError } = await supabase
+      .from('content_items')
+      .update({
+        media_asset_id: asset.id,
+        output: nextOutput,
+        updated_at: new Date().toISOString(),
+      })
+      .eq('id', item.id);
+
+    if (contentError) {
+      await supabase.from('media_assets').update({ status: 'removed' }).eq('id', asset.id);
+      await supabase.storage.from(bucket).remove([storagePath]);
+      throw contentError;
+    }
+
+    if (item.mediaAssetId) {
+      const { data: oldAsset } = await supabase
+        .from('media_assets')
+        .select('storage_bucket, storage_path')
+        .eq('id', item.mediaAssetId)
+        .maybeSingle();
+
+      await supabase.from('media_assets').update({ status: 'removed' }).eq('id', item.mediaAssetId);
+      if (oldAsset?.storage_bucket && oldAsset?.storage_path) {
+        await supabase.storage.from(oldAsset.storage_bucket).remove([oldAsset.storage_path]);
+      }
+    }
+
+    await loadData();
+    return publicUrl;
+  }, [loadData]);
+
+  const removeMedia = useCallback(async (item: ScheduledContent) => {
+    const mediaAssetId = item.mediaAssetId;
+    const nextOutput = { ...(item.output || {}), mediaUrl: '' };
+
+    const { error: detachError } = await supabase
+      .from('content_items')
+      .update({
+        media_asset_id: null,
+        output: nextOutput,
+        updated_at: new Date().toISOString(),
+      })
+      .eq('id', item.id);
+
+    if (detachError) throw detachError;
+
+    if (mediaAssetId) {
+      const { data: asset } = await supabase
+        .from('media_assets')
+        .select('storage_bucket, storage_path')
+        .eq('id', mediaAssetId)
+        .maybeSingle();
+
+      await supabase.from('media_assets').update({ status: 'removed' }).eq('id', mediaAssetId);
+      if (asset?.storage_bucket && asset?.storage_path) {
+        await supabase.storage.from(asset.storage_bucket).remove([asset.storage_path]);
+      }
+    }
+
+    await loadData();
+  }, [loadData]);
+
   // Publish a single item via the Edge Function
   const publishItem = useCallback(
     async (item: ScheduledContent) => {
@@ -249,5 +371,16 @@ export function usePublishPipeline() {
     [scheduled, publishItem]
   );
 
-  return { scheduled, publishJobs, loading, publishing, publishItem, publishAll, setPinterestMediaUrl, refresh: loadData };
+  return {
+    scheduled,
+    publishJobs,
+    loading,
+    publishing,
+    publishItem,
+    publishAll,
+    setPinterestMediaUrl,
+    uploadMedia,
+    removeMedia,
+    refresh: loadData,
+  };
 }

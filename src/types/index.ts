@@ -59,6 +59,21 @@ export interface ContentOutput {
   mediaUrl?: string;
 }
 
+export interface MediaAsset {
+  id: string;
+  contentId: string | null;
+  platform: PlatformId | null;
+  contentType: string;
+  fileName: string;
+  fileSize: number | null;
+  storageBucket: string;
+  storagePath: string;
+  publicUrl: string;
+  altText: string | null;
+  label: string | null;
+  status: 'active' | 'removed';
+}
+
 export interface ContentItem {
   id: string;
   platform: PlatformId;
@@ -71,6 +86,7 @@ export interface ContentItem {
   input: Partial<ContentInput>;
   output: Partial<ContentOutput>;
   assignee: string;
+  mediaAssetId?: string | null;
 }
 
 // ── Universal Workflow Types ──
