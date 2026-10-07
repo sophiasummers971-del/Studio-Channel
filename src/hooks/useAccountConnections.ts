@@ -105,12 +105,23 @@ export function useAccountConnections() {
   }, [refreshConnections]);
 
   const startOAuth = useCallback(async (provider: string) => {
+    const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+    if (sessionError) throw sessionError;
+
+    const accessToken = sessionData.session?.access_token;
+    if (!accessToken) {
+      throw new Error('Your Studio session is not available. Sign in again and retry.');
+    }
+
     const { data, error } = await supabase.functions.invoke('auth_start', {
       body: { provider },
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
     });
 
     if (error) throw error;
-    if (!data?.authorizeUrl) throw new Error('Provider authorization URL was not returned.');
+    if (!data?.authorizeUrl) throw new Error(data?.error || 'Provider authorization URL was not returned.');
 
     window.location.assign(data.authorizeUrl);
   }, []);
