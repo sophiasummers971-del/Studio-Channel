@@ -123,9 +123,9 @@ export function useTestPlan() {
     if (scenarioId === 'test-trigger') {
       const trigger = snapshot.workflowRuns.find((row) => row.stage === 'trigger');
       if (trigger?.status === 'complete') {
-        status = 'passed';
-        checksPassed = checksTotal;
-        notes = `Recorded trigger evidence exists for ${trigger.date}. This verifies a persisted trigger run, not the scheduler itself.`;
+        status = 'warning';
+        checksPassed = 1;
+        notes = `A completed trigger row is recorded for ${trigger.date}, but this does not prove the 7:00 AM scheduler fired automatically.`;
       } else {
         status = 'failed';
         notes = 'No completed trigger run is recorded. Automatic 7:00 AM scheduling is not proven.';
@@ -136,8 +136,8 @@ export function useTestPlan() {
       const completed = new Set(rows.filter((row) => row.status === 'complete').map((row) => row.stage));
       checksPassed = DAILY_STAGE_IDS.filter((stage) => completed.has(stage)).length;
       if (DAILY_STAGE_IDS.every((stage) => completed.has(stage))) {
-        status = 'passed';
-        notes = `All six daily stages are recorded complete for ${latestDate}.`;
+        status = 'warning';
+        notes = `All six daily stages are recorded complete for ${latestDate}, but persisted statuses alone do not prove each stage received the previous stage output without loss or duplication.`;
       } else {
         status = snapshot.workflowRuns.length ? 'failed' : 'warning';
         notes = snapshot.workflowRuns.length
@@ -150,7 +150,7 @@ export function useTestPlan() {
         return Boolean(output.caption && Array.isArray(output.hashtags) && output.visualDirection);
       });
       checksPassed = usable.length ? Math.min(checksTotal, 3) : 0;
-      status = usable.length ? 'passed' : 'warning';
+      status = 'warning';
       notes = usable.length
         ? `${usable.length} stored content item(s) contain real structured output fields.`
         : 'No stored content output exists yet, so output quality cannot be verified.';
@@ -175,8 +175,8 @@ export function useTestPlan() {
         snapshot.contentItems.filter((row) => row.stage === 'scheduled' || row.stage === 'published').map((row) => row.id)
       );
       const promoted = approved.filter((row) => scheduledIds.has(row.content_id));
-      checksPassed = promoted.length ? checksTotal : 0;
-      status = promoted.length ? 'passed' : 'warning';
+      checksPassed = promoted.length ? 2 : 0;
+      status = 'warning';
       notes = promoted.length
         ? `${promoted.length} approved item(s) have persisted into scheduled/published content.`
         : 'No approved-to-scheduled transition is recorded yet. Approval flow remains unverified.';
@@ -188,8 +188,8 @@ export function useTestPlan() {
         const output = row.output || {};
         return Boolean(output.caption && output.visualDirection && output.postingTime);
       });
-      checksPassed = adaptable.length ? checksTotal : 0;
-      status = adaptable.length ? 'passed' : 'warning';
+      checksPassed = adaptable.length ? Math.min(checksTotal, 3) : 0;
+      status = 'warning';
       notes = adaptable.length
         ? `${adaptable.length} stored output(s) contain reusable caption, visual-direction and posting-time fields.`
         : 'No stored outputs exist to verify adaptation.';
