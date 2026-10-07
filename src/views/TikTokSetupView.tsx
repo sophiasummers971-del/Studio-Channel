@@ -129,7 +129,7 @@ export function TikTokSetupView() {
               >
                 <div
                   className={`w-6 h-6 rounded-full flex items-center justify-center shrink-0 mt-0.5 transition-all ${
-                    isSelected ? 'bg-cyan-400/[0.04]0' : 'bg-[#0b1118] border-2 border-slate-300'
+                    isSelected ? 'bg-sky-500' : 'bg-[#0b1118] border-2 border-slate-300'
                   }`}
                 >
                   {isSelected && <CheckCircle2 size={14} className="text-white" />}
