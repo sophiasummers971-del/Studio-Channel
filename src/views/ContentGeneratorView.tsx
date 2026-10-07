@@ -56,27 +56,32 @@ export function ContentGeneratorView() {
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [saved, setSaved] = useState<Set<string>>(new Set());
   const [saveError, setSaveError] = useState<string | null>(null);
+  const [generationError, setGenerationError] = useState<string | null>(null);
 
-  const handleGenerate = useCallback(() => {
+  const handleGenerate = useCallback(async () => {
     if (!topic.trim()) return;
     setGenerating(true);
+    setGenerationError(null);
     setGenerated([]);
     setSaved(new Set());
 
-    // Simulate slight delay for UX
-    setTimeout(async () => {
-      const input: GenerationInput = {
-        platform: selectedPlatform,
-        topic: topic.trim(),
-        niche,
-        tone,
-        audience: audience.trim() || 'General audience interested in ' + niche,
-        count,
-      };
+    const input: GenerationInput = {
+      platform: selectedPlatform,
+      topic: topic.trim(),
+      niche,
+      tone,
+      audience: audience.trim() || 'General audience interested in ' + niche,
+      count,
+    };
+
+    try {
       const items = useAI ? await generateContentAI(input) : generateContent(input);
       setGenerated(items);
+    } catch (error) {
+      setGenerationError(error instanceof Error ? error.message : 'Generation failed.');
+    } finally {
       setGenerating(false);
-    }, 800);
+    }
   }, [selectedPlatform, topic, niche, tone, audience, count, useAI]);
 
   const handleSaveItem = useCallback(async (item: ContentItem) => {
@@ -144,6 +149,12 @@ export function ContentGeneratorView() {
           </span>
         )}
       </div>
+
+      {generationError && (
+        <div className="mb-5 rounded-xl border border-rose-400/20 bg-rose-400/[0.05] px-4 py-3 text-sm text-rose-300">
+          AI generation failed: {generationError}
+        </div>
+      )}
 
       {saveError && (
         <div className="mb-5 rounded-xl border border-rose-400/20 bg-rose-400/[0.05] px-4 py-3 text-sm text-rose-300">
