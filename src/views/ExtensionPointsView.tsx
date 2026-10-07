@@ -38,7 +38,7 @@ export function ExtensionPointsView() {
   return (
     <div className="p-8 max-w-6xl mx-auto">
       <div className="mb-6">
-        <h2 className="text-2xl font-bold text-slate-900 mb-1">Extension Points</h2>
+        <h2 className="text-2xl font-bold text-slate-100 mb-1">Extension Points</h2>
         <p className="text-sm text-slate-500">
           What stays universal in the baseline workflow and what will later become channel-specific.
           Each extension point shows the platform override that replaces the universal behavior.
@@ -47,13 +47,13 @@ export function ExtensionPointsView() {
 
       {/* Universal vs Channel Split */}
       <div className="grid grid-cols-2 gap-4 mb-8">
-        <div className="bg-white border border-slate-200 rounded-xl p-5">
+        <div className="bg-[#0b1118] border border-[#1b2935] rounded-xl p-5">
           <div className="flex items-center gap-2 mb-3">
-            <div className="w-9 h-9 rounded-lg bg-sky-50 flex items-center justify-center">
+            <div className="w-9 h-9 rounded-lg bg-cyan-400/[0.04] flex items-center justify-center">
               <Lock size={18} className="text-sky-500" />
             </div>
             <div>
-              <h3 className="text-sm font-semibold text-slate-800">Universal (Locked)</h3>
+              <h3 className="text-sm font-semibold text-slate-200">Universal (Locked)</h3>
               <p className="text-xs text-slate-400">Same behavior across all channels</p>
             </div>
           </div>
@@ -62,22 +62,22 @@ export function ExtensionPointsView() {
               const stage = WORKFLOW_STAGES.find((s) => s.id === ep.id);
               const Icon = STAGE_ICONS[stage?.icon || ''] || Lock;
               return (
-                <div key={ep.id} className="flex items-center gap-2 px-3 py-2 bg-sky-50/50 rounded-lg">
+                <div key={ep.id} className="flex items-center gap-2 px-3 py-2 bg-cyan-400/[0.04]/50 rounded-lg">
                   <Icon size={14} className="text-sky-500 shrink-0" />
-                  <span className="text-xs font-medium text-slate-700">{ep.label}</span>
+                  <span className="text-xs font-medium text-slate-300">{ep.label}</span>
                 </div>
               );
             })}
           </div>
         </div>
 
-        <div className="bg-white border border-slate-200 rounded-xl p-5">
+        <div className="bg-[#0b1118] border border-[#1b2935] rounded-xl p-5">
           <div className="flex items-center gap-2 mb-3">
-            <div className="w-9 h-9 rounded-lg bg-amber-50 flex items-center justify-center">
+            <div className="w-9 h-9 rounded-lg bg-amber-400/[0.05] flex items-center justify-center">
               <Unlock size={18} className="text-amber-500" />
             </div>
             <div>
-              <h3 className="text-sm font-semibold text-slate-800">Channel-Specific (Extensible)</h3>
+              <h3 className="text-sm font-semibold text-slate-200">Channel-Specific (Extensible)</h3>
               <p className="text-xs text-slate-400">Overridden per platform</p>
             </div>
           </div>
@@ -86,9 +86,9 @@ export function ExtensionPointsView() {
               const stage = WORKFLOW_STAGES.find((s) => s.id === ep.id);
               const Icon = STAGE_ICONS[stage?.icon || ''] || Unlock;
               return (
-                <div key={ep.id} className="flex items-center gap-2 px-3 py-2 bg-amber-50/50 rounded-lg">
+                <div key={ep.id} className="flex items-center gap-2 px-3 py-2 bg-amber-400/[0.05]/50 rounded-lg">
                   <Icon size={14} className="text-amber-500 shrink-0" />
-                  <span className="text-xs font-medium text-slate-700">{ep.label}</span>
+                  <span className="text-xs font-medium text-slate-300">{ep.label}</span>
                   <span className="ml-auto text-[10px] text-slate-400">{ep.channelOverrides.length} overrides</span>
                 </div>
               );
@@ -101,7 +101,7 @@ export function ExtensionPointsView() {
       <div className="mb-6">
         <div className="flex items-center gap-2 mb-4">
           <Layers size={16} className="text-slate-400" />
-          <h3 className="text-sm font-semibold text-slate-700">Stage-by-Stage Extension Map</h3>
+          <h3 className="text-sm font-semibold text-slate-300">Stage-by-Stage Extension Map</h3>
         </div>
 
         <div className="space-y-3">
@@ -114,15 +114,15 @@ export function ExtensionPointsView() {
             return (
               <div
                 key={stageId}
-                className={`bg-white border rounded-xl p-4 ${
-                  isUniversal ? 'border-slate-200' : 'border-amber-200'
+                className={`bg-[#0b1118] border rounded-xl p-4 ${
+                  isUniversal ? 'border-[#1b2935]' : 'border-amber-400/15'
                 }`}
               >
                 <div className="flex items-start gap-4">
                   <div className="flex flex-col items-center">
                     <div
                       className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${
-                        isUniversal ? 'bg-sky-50' : 'bg-amber-50'
+                        isUniversal ? 'bg-cyan-400/[0.04]' : 'bg-amber-400/[0.05]'
                       }`}
                     >
                       <Icon size={18} className={isUniversal ? 'text-sky-500' : 'text-amber-500'} />
@@ -137,17 +137,17 @@ export function ExtensionPointsView() {
                       <span className="text-[10px] font-bold text-slate-400">
                         {String(i + 1).padStart(2, '0')}
                       </span>
-                      <h4 className="text-sm font-semibold text-slate-800">{stage.label}</h4>
+                      <h4 className="text-sm font-semibold text-slate-200">{stage.label}</h4>
                       <span
                         className={`text-[10px] font-medium px-2 py-0.5 rounded-full ${
                           isUniversal
-                            ? 'bg-sky-100 text-sky-700'
-                            : 'bg-amber-100 text-amber-700'
+                            ? 'bg-sky-100 text-cyan-200/75'
+                            : 'bg-amber-100 text-amber-200/75'
                         }`}
                       >
                         {isUniversal ? 'Universal' : 'Channel-Specific'}
                       </span>
-                      <span className="text-[10px] text-slate-400 px-1.5 py-0.5 rounded-full bg-slate-100">
+                      <span className="text-[10px] text-slate-400 px-1.5 py-0.5 rounded-full bg-[#101820]">
                         {stage.cadence}
                       </span>
                     </div>
@@ -161,7 +161,7 @@ export function ExtensionPointsView() {
                           return (
                             <div
                               key={override.platform}
-                              className="flex items-start gap-2 px-3 py-2 bg-slate-50 rounded-lg"
+                              className="flex items-start gap-2 px-3 py-2 bg-[#070b10] rounded-lg"
                             >
                               <span
                                 className="w-5 h-5 rounded-md flex items-center justify-center text-[9px] font-bold shrink-0 mt-0.5"
@@ -170,7 +170,7 @@ export function ExtensionPointsView() {
                                 {platform.label[0]}
                               </span>
                               <div>
-                                <p className="text-[10px] font-medium text-slate-600">{platform.label}</p>
+                                <p className="text-[10px] font-medium text-slate-400">{platform.label}</p>
                                 <p className="text-[11px] text-slate-500 leading-snug">{override.behavior}</p>
                               </div>
                             </div>
@@ -187,23 +187,23 @@ export function ExtensionPointsView() {
       </div>
 
       {/* Future Channel Summary */}
-      <div className="bg-gradient-to-br from-slate-50 to-sky-50 border border-slate-200 rounded-xl p-5">
+      <div className="bg-gradient-to-br from-slate-50 to-sky-50 border border-[#1b2935] rounded-xl p-5">
         <div className="flex items-center gap-2 mb-3">
           <Boxes size={16} className="text-slate-500" />
-          <h3 className="text-sm font-semibold text-slate-700">How Channel-Specific Flows Will Plug In</h3>
+          <h3 className="text-sm font-semibold text-slate-300">How Channel-Specific Flows Will Plug In</h3>
         </div>
         <div className="flex items-center gap-4">
           <div className="flex-1 space-y-1.5">
-            <div className="flex items-center gap-2 text-xs text-slate-600">
-              <div className="w-2 h-2 rounded-full bg-sky-500" />
+            <div className="flex items-center gap-2 text-xs text-slate-400">
+              <div className="w-2 h-2 rounded-full bg-cyan-400/[0.04]0" />
               <span><strong>Universal stages</strong> run identically for every channel</span>
             </div>
-            <div className="flex items-center gap-2 text-xs text-slate-600">
-              <div className="w-2 h-2 rounded-full bg-amber-500" />
+            <div className="flex items-center gap-2 text-xs text-slate-400">
+              <div className="w-2 h-2 rounded-full bg-amber-400/[0.05]0" />
               <span><strong>Extension points</strong> are overridden when a channel-specific flow is active</span>
             </div>
-            <div className="flex items-center gap-2 text-xs text-slate-600">
-              <div className="w-2 h-2 rounded-full bg-emerald-500" />
+            <div className="flex items-center gap-2 text-xs text-slate-400">
+              <div className="w-2 h-2 rounded-full bg-emerald-400/[0.045]0" />
               <span><strong>Fallback</strong> disables overrides and runs the universal baseline</span>
             </div>
           </div>
@@ -211,7 +211,7 @@ export function ExtensionPointsView() {
             {PLATFORMS.map((p) => (
               <div
                 key={p.id}
-                className="flex flex-col items-center gap-1 px-3 py-2 bg-white rounded-lg border border-slate-200"
+                className="flex flex-col items-center gap-1 px-3 py-2 bg-[#0b1118] rounded-lg border border-[#1b2935]"
               >
                 <span
                   className="w-7 h-7 rounded-lg flex items-center justify-center text-[10px] font-bold"
