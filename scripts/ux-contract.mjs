@@ -8,6 +8,9 @@ const contentHook = read('src/hooks/useContentData.ts');
 const topbar = read('src/components/TopBar.tsx');
 const app = read('src/App.tsx');
 const styles = read('src/index.css');
+const workflowHook = read('src/hooks/useWorkflow.ts');
+const weeklyBatchHook = read('src/hooks/useWeeklyBatch.ts');
+const generator = read('src/views/ContentGeneratorView.tsx');
 
 for (const label of ['Home', 'Create', 'Approvals', 'Publish', 'Accounts']) {
   assert.match(sidebar, new RegExp(`label: ['"]${label}['"]`),
@@ -29,6 +32,16 @@ assert.doesNotMatch(contentHook, /MOCK_CONTENT/,
   'live content hook must never substitute mock rows for an empty or unavailable production database');
 assert.match(contentHook, /useState<ContentItem\[\]>\(\[\]\)/,
   'live content state must start empty rather than with demo rows');
+assert.doesNotMatch(contentHook, /local-\$\{Date\.now\(\)\}/,
+  'failed content writes must never be replaced with fake local rows');
+assert.doesNotMatch(contentHook, /Offline fallback/,
+  'content persistence errors must not be silently hidden');
+assert.doesNotMatch(workflowHook, /MOCK_APPROVAL_BATCHES|MOCK_RUNS/,
+  'live workflow state must not fall back to mock approval or run data');
+assert.match(weeklyBatchHook, /maybeSingle\(\)/,
+  'weekly batch lookup must tolerate an empty result without a 406');
+assert.match(generator, /Save failed:/,
+  'generator must surface persistence failures to the operator');
 
 assert.match(topbar, /onNewContent/,
   'top bar must accept a working new-content action');
