@@ -13,6 +13,9 @@ import {
   Zap,
   AlertTriangle,
   Rocket,
+  Upload,
+  Trash2,
+  Image as ImageIcon,
 } from 'lucide-react';
 
 const STATUS_CONFIG: Record<string, { label: string; color: string; bg: string; icon: typeof CheckCircle2 }> = {
@@ -23,11 +26,21 @@ const STATUS_CONFIG: Record<string, { label: string; color: string; bg: string; 
 };
 
 export function PublishHandoffView() {
-  const { scheduled, loading, publishing, publishItem, publishAll, setPinterestMediaUrl, refresh } = usePublishPipeline();
+  const {
+    scheduled,
+    loading,
+    publishing,
+    publishItem,
+    publishAll,
+    setPinterestMediaUrl,
+    uploadMedia,
+    removeMedia,
+  } = usePublishPipeline();
   const [activePlatform, setActivePlatform] = useState<PlatformId | null>(null);
   const [results, setResults] = useState<Record<string, { ok: boolean; error?: string; pinLink?: string }>>({});
   const [mediaDrafts, setMediaDrafts] = useState<Record<string, string>>({});
   const [savingMedia, setSavingMedia] = useState<Set<string>>(new Set());
+  const [uploadingMedia, setUploadingMedia] = useState<Set<string>>(new Set());
 
   const saveMediaUrl = useCallback(async (item: ScheduledContent) => {
     const value = (mediaDrafts[item.id] ?? item.output.mediaUrl ?? '').trim();
@@ -45,6 +58,59 @@ export function PublishHandoffView() {
       });
     }
   }, [mediaDrafts, setPinterestMediaUrl]);
+
+  const handleMediaUpload = useCallback(async (item: ScheduledContent, file: File | null) => {
+    if (!file) return;
+    setUploadingMedia((prev) => new Set(prev).add(item.id));
+    try {
+      const publicUrl = await uploadMedia(item, file);
+      setMediaDrafts((prev) => ({ ...prev, [item.id]: publicUrl }));
+      setResults((prev) => ({
+        ...prev,
+        [item.id]: { ok: false, error: 'Media uploaded and attached. Ready for publish validation.' },
+      }));
+    } catch (error) {
+      setResults((prev) => ({
+        ...prev,
+        [item.id]: {
+          ok: false,
+          error: error instanceof Error ? error.message : 'Could not upload media.',
+        },
+      }));
+    } finally {
+      setUploadingMedia((prev) => {
+        const next = new Set(prev);
+        next.delete(item.id);
+        return next;
+      });
+    }
+  }, [uploadMedia]);
+
+  const handleRemoveMedia = useCallback(async (item: ScheduledContent) => {
+    setUploadingMedia((prev) => new Set(prev).add(item.id));
+    try {
+      await removeMedia(item);
+      setMediaDrafts((prev) => ({ ...prev, [item.id]: '' }));
+      setResults((prev) => ({
+        ...prev,
+        [item.id]: { ok: false, error: 'Media removed from this content item.' },
+      }));
+    } catch (error) {
+      setResults((prev) => ({
+        ...prev,
+        [item.id]: {
+          ok: false,
+          error: error instanceof Error ? error.message : 'Could not remove media.',
+        },
+      }));
+    } finally {
+      setUploadingMedia((prev) => {
+        const next = new Set(prev);
+        next.delete(item.id);
+        return next;
+      });
+    }
+  }, [removeMedia]);
 
   const filtered = activePlatform
     ? scheduled.filter((item) => item.platform === activePlatform)
@@ -282,25 +348,82 @@ export function PublishHandoffView() {
                   )}
                 </div>
 
-                {item.platform === 'pinterest' && status !== 'published' && (
-                  <div className="mt-3 grid gap-2 md:grid-cols-[1fr_auto]">
-                    <input
-                      type="url"
-                      value={mediaDrafts[item.id] ?? item.output.mediaUrl ?? ''}
-                      onChange={(e) => setMediaDrafts((prev) => ({ ...prev, [item.id]: e.target.value }))}
-                      placeholder="https://example.com/image.jpg"
-                      className="w-full px-3 py-2 rounded-lg border border-[#1b2935] bg-[#070b10] text-sm text-slate-200 placeholder:text-slate-600 focus:outline-none focus:ring-2 focus:ring-cyan-500/40"
-                    />
-                    <button
-                      onClick={() => void saveMediaUrl(item)}
-                      disabled={savingMedia.has(item.id)}
-                      className="px-3 py-2 rounded-lg text-xs font-semibold bg-[#101820] text-cyan-200 border border-cyan-400/15 hover:bg-[#13202a] disabled:opacity-50"
-                    >
-                      {savingMedia.has(item.id) ? 'Saving…' : 'Save image URL'}
-                    </button>
-                    <p className="md:col-span-2 text-[11px] text-slate-500">
-                      Pinterest publishing requires a public HTTPS image URL. Thumbnail concept text is never used as media.
-                    </p>
+                {status !== 'published' && (
+                  <div className="mt-3 rounded-lg border border-[#1b2935] bg-[#070b10]/60 p-3">
+                    <div className="flex items-center gap-3 flex-wrap">
+                      {item.output.mediaUrl ? (
+                        <img
+                          src={item.output.mediaUrl}
+                          alt={item.output.altText || item.title}
+                          className="w-16 h-16 rounded-lg object-cover border border-[#1b2935]"
+                        />
+                      ) : (
+                        <div className="w-16 h-16 rounded-lg border border-dashed border-[#2a3946] flex items-center justify-center text-slate-600">
+                          <ImageIcon size={22} />
+                        </div>
+                      )}
+
+                      <div className="flex-1 min-w-[180px]">
+                        <p className="text-xs font-semibold text-slate-300">Publish media</p>
+                        <p className="text-[11px] text-slate-500 mt-1">
+                          Upload once and reuse the direct HTTPS asset URL across supported channels.
+                        </p>
+                        {item.output.mediaUrl && (
+                          <p className="text-[10px] text-cyan-300/70 mt-1 truncate">
+                            {item.output.mediaUrl}
+                          </p>
+                        )}
+                      </div>
+
+                      <label className="px-3 py-2 rounded-lg text-xs font-semibold bg-[#101820] text-cyan-200 border border-cyan-400/15 hover:bg-[#13202a] cursor-pointer inline-flex items-center gap-2">
+                        <Upload size={13} />
+                        {uploadingMedia.has(item.id) ? 'Uploading…' : item.output.mediaUrl ? 'Replace' : 'Upload image'}
+                        <input
+                          type="file"
+                          accept="image/*"
+                          className="hidden"
+                          disabled={uploadingMedia.has(item.id)}
+                          onChange={(e) => {
+                            const file = e.target.files?.[0] ?? null;
+                            void handleMediaUpload(item, file);
+                            e.currentTarget.value = '';
+                          }}
+                        />
+                      </label>
+
+                      {item.output.mediaUrl && (
+                        <button
+                          onClick={() => void handleRemoveMedia(item)}
+                          disabled={uploadingMedia.has(item.id)}
+                          className="px-3 py-2 rounded-lg text-xs font-semibold bg-rose-400/[0.04] text-rose-300 border border-rose-400/15 hover:bg-rose-400/[0.08] disabled:opacity-50 inline-flex items-center gap-2"
+                        >
+                          <Trash2 size={13} />
+                          Remove
+                        </button>
+                      )}
+                    </div>
+
+                    {item.platform === 'pinterest' && (
+                      <div className="mt-3 pt-3 border-t border-[#1b2935] grid gap-2 md:grid-cols-[1fr_auto]">
+                        <input
+                          type="url"
+                          value={mediaDrafts[item.id] ?? item.output.mediaUrl ?? ''}
+                          onChange={(e) => setMediaDrafts((prev) => ({ ...prev, [item.id]: e.target.value }))}
+                          placeholder="Or paste a direct public HTTPS image URL"
+                          className="w-full px-3 py-2 rounded-lg border border-[#1b2935] bg-[#070b10] text-sm text-slate-200 placeholder:text-slate-600 focus:outline-none focus:ring-2 focus:ring-cyan-500/40"
+                        />
+                        <button
+                          onClick={() => void saveMediaUrl(item)}
+                          disabled={savingMedia.has(item.id)}
+                          className="px-3 py-2 rounded-lg text-xs font-semibold bg-[#101820] text-cyan-200 border border-cyan-400/15 hover:bg-[#13202a] disabled:opacity-50"
+                        >
+                          {savingMedia.has(item.id) ? 'Saving…' : 'Save fallback URL'}
+                        </button>
+                        <p className="md:col-span-2 text-[11px] text-slate-500">
+                          Pinterest requires a public HTTPS image. Uploaded Studio media is used automatically; manual URL remains a fallback.
+                        </p>
+                      </div>
+                    )}
                   </div>
                 )}
 
