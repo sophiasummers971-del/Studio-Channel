@@ -31,7 +31,7 @@ export function InputPanel() {
       <div className="mb-6">
         <div className="flex items-center gap-2 mb-1">
           <ArrowDown size={18} className="text-sky-500" />
-          <h2 className="text-2xl font-bold text-slate-900">Standard Inputs</h2>
+          <h2 className="text-2xl font-bold text-slate-100">Standard Inputs</h2>
         </div>
         <p className="text-sm text-slate-500">
           The universal input model every channel uses to start the content workflow
@@ -42,7 +42,7 @@ export function InputPanel() {
         {PLATFORMS.map((p) => (
           <div
             key={p.id}
-            className="flex items-center gap-2 bg-white border border-slate-200 rounded-lg px-3 py-2.5"
+            className="flex items-center gap-2 bg-[#0b1118] border border-[#1b2935] rounded-lg px-3 py-2.5"
           >
             <span
               className="w-6 h-6 rounded-md flex items-center justify-center text-[10px] font-bold"
@@ -50,7 +50,7 @@ export function InputPanel() {
             >
               {p.label[0]}
             </span>
-            <span className="text-xs font-medium text-slate-600">{p.label}</span>
+            <span className="text-xs font-medium text-slate-400">{p.label}</span>
             <span className="text-[10px] text-slate-400 ml-auto">
               {p.formats.length} formats
             </span>
@@ -58,9 +58,9 @@ export function InputPanel() {
         ))}
       </div>
 
-      <div className="bg-white border border-slate-200 rounded-xl overflow-hidden">
-        <div className="bg-slate-50 px-5 py-3 border-b border-slate-200">
-          <h3 className="text-sm font-semibold text-slate-700">Input Schema</h3>
+      <div className="bg-[#0b1118] border border-[#1b2935] rounded-xl overflow-hidden">
+        <div className="bg-[#070b10] px-5 py-3 border-b border-[#1b2935]">
+          <h3 className="text-sm font-semibold text-slate-300">Input Schema</h3>
           <p className="text-xs text-slate-400 mt-0.5">
             These fields are collected for every content item across all platforms
           </p>
@@ -71,7 +71,7 @@ export function InputPanel() {
             const Icon = field.icon;
             return (
               <div key={field.key}>
-                <label className="flex items-center gap-2 text-sm font-medium text-slate-700 mb-1.5">
+                <label className="flex items-center gap-2 text-sm font-medium text-slate-300 mb-1.5">
                   <Icon size={15} className="text-slate-400" />
                   {field.label}
                 </label>
@@ -79,17 +79,17 @@ export function InputPanel() {
                   <textarea
                     placeholder={field.placeholder}
                     rows={2}
-                    className="w-full px-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded-lg outline-none transition-all focus:bg-white focus:border-sky-300 focus:ring-2 focus:ring-sky-100 placeholder:text-slate-400 resize-none"
+                    className="w-full px-3 py-2 text-sm bg-[#070b10] border border-[#1b2935] rounded-lg outline-none transition-all focus:bg-[#0b1118] focus:border-sky-300 focus:ring-2 focus:ring-sky-100 placeholder:text-slate-400 resize-none"
                   />
                 ) : field.type === 'tags' ? (
-                  <div className="flex items-center gap-2 flex-wrap min-h-[38px] px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg">
+                  <div className="flex items-center gap-2 flex-wrap min-h-[38px] px-3 py-2 bg-[#070b10] border border-[#1b2935] rounded-lg">
                     <span className="text-xs text-slate-400">Add tags and press Enter</span>
                   </div>
                 ) : (
                   <input
                     type="text"
                     placeholder={field.placeholder}
-                    className="w-full px-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded-lg outline-none transition-all focus:bg-white focus:border-sky-300 focus:ring-2 focus:ring-sky-100 placeholder:text-slate-400"
+                    className="w-full px-3 py-2 text-sm bg-[#070b10] border border-[#1b2935] rounded-lg outline-none transition-all focus:bg-[#0b1118] focus:border-sky-300 focus:ring-2 focus:ring-sky-100 placeholder:text-slate-400"
                   />
                 )}
               </div>
@@ -99,13 +99,13 @@ export function InputPanel() {
       </div>
 
       {sampleItem && (
-        <div className="mt-6 bg-white border border-slate-200 rounded-xl p-5">
-          <h3 className="text-sm font-semibold text-slate-700 mb-3">Sample Input</h3>
+        <div className="mt-6 bg-[#0b1118] border border-[#1b2935] rounded-xl p-5">
+          <h3 className="text-sm font-semibold text-slate-300 mb-3">Sample Input</h3>
           <div className="grid grid-cols-2 gap-3">
             {Object.entries(sampleItem.input).map(([key, value]) => (
-              <div key={key} className="bg-slate-50 rounded-lg p-3">
+              <div key={key} className="bg-[#070b10] rounded-lg p-3">
                 <span className="text-[10px] font-medium text-slate-400 uppercase tracking-wide">{key}</span>
-                <p className="text-xs text-slate-700 mt-1">
+                <p className="text-xs text-slate-300 mt-1">
                   {Array.isArray(value) ? value.join(', ') : String(value)}
                 </p>
               </div>
