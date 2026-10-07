@@ -104,14 +104,15 @@ export function useAccountConnections() {
     void refreshConnections();
   }, [refreshConnections]);
 
-  const startOAuth = useCallback((provider: string) => {
-    const supabaseUrl = import.meta.env.VITE_SUPABASE_URL as string | undefined;
-    if (!supabaseUrl) {
-      throw new Error('Supabase URL is not configured.');
-    }
+  const startOAuth = useCallback(async (provider: string) => {
+    const { data, error } = await supabase.functions.invoke('auth_start', {
+      body: { provider },
+    });
 
-    window.location.href =
-      `${supabaseUrl}/functions/v1/auth_start?provider=${encodeURIComponent(provider)}`;
+    if (error) throw error;
+    if (!data?.authorizeUrl) throw new Error('Provider authorization URL was not returned.');
+
+    window.location.assign(data.authorizeUrl);
   }, []);
 
   const handleCallback = useCallback(() => {
