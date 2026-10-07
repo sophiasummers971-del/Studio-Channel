@@ -55,6 +55,7 @@ export function ContentGeneratorView() {
   const [generated, setGenerated] = useState<ContentItem[]>([]);
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [saved, setSaved] = useState<Set<string>>(new Set());
+  const [saveError, setSaveError] = useState<string | null>(null);
 
   const handleGenerate = useCallback(() => {
     if (!topic.trim()) return;
@@ -79,22 +80,8 @@ export function ContentGeneratorView() {
   }, [selectedPlatform, topic, niche, tone, audience, count, useAI]);
 
   const handleSaveItem = useCallback(async (item: ContentItem) => {
-    const savedItem = await addContent({
-      platform: item.platform,
-      format: item.format,
-      title: item.title,
-      stage: 'ideation',
-      assignee: 'AI Generator',
-      input: item.input,
-      output: item.output,
-    });
-    await addToBatch(savedItem);
-    setSaved((prev) => new Set(prev).add(item.id));
-  }, [addContent, addToBatch]);
-
-  const handleSaveAll = useCallback(async () => {
-    const toSave = generated.filter((item) => !saved.has(item.id));
-    for (const item of toSave) {
+    setSaveError(null);
+    try {
       const savedItem = await addContent({
         platform: item.platform,
         format: item.format,
@@ -106,6 +93,30 @@ export function ContentGeneratorView() {
       });
       await addToBatch(savedItem);
       setSaved((prev) => new Set(prev).add(item.id));
+    } catch (error) {
+      setSaveError(error instanceof Error ? error.message : 'Could not save generated content.');
+    }
+  }, [addContent, addToBatch]);
+
+  const handleSaveAll = useCallback(async () => {
+    setSaveError(null);
+    const toSave = generated.filter((item) => !saved.has(item.id));
+    try {
+      for (const item of toSave) {
+        const savedItem = await addContent({
+          platform: item.platform,
+          format: item.format,
+          title: item.title,
+          stage: 'ideation',
+          assignee: 'AI Generator',
+          input: item.input,
+          output: item.output,
+        });
+        await addToBatch(savedItem);
+        setSaved((prev) => new Set(prev).add(item.id));
+      }
+    } catch (error) {
+      setSaveError(error instanceof Error ? error.message : 'Could not save generated content.');
     }
   }, [generated, saved, addContent, addToBatch]);
 
@@ -133,6 +144,12 @@ export function ContentGeneratorView() {
           </span>
         )}
       </div>
+
+      {saveError && (
+        <div className="mb-5 rounded-xl border border-rose-400/20 bg-rose-400/[0.05] px-4 py-3 text-sm text-rose-300">
+          Save failed: {saveError}
+        </div>
+      )}
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Left: Generator Form */}

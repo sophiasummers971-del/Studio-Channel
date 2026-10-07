@@ -9,7 +9,6 @@ interface DbRow {
   title: string;
   stage: string;
   status: string;
-  assignee: string | null;
   input: Record<string, unknown> | null;
   output: Record<string, unknown> | null;
   created_at: string;
@@ -24,7 +23,7 @@ function mapRow(row: DbRow): ContentItem {
     title: row.title,
     stage: row.stage as ContentItem['stage'],
     status: row.status as ContentItem['status'],
-    assignee: row.assignee || '',
+    assignee: '',
     input: (row.input as Partial<ContentInput>) || {},
     output: (row.output as Partial<ContentOutput>) || {},
     createdAt: row.created_at,
@@ -70,40 +69,21 @@ export function useContentData() {
       title: item.title,
       stage: item.stage || 'ideation',
       status: 'active' as ContentStatus,
-      assignee: item.assignee || '',
       input: item.input || { topic: item.title },
       output: item.output || {},
     };
-    try {
-      const { data, error } = await supabase
-        .from('content_items')
-        .insert(row)
-        .select('*')
-        .single();
-      if (error) throw error;
-      if (data) {
-        const mapped = mapRow(data as DbRow);
-        setContent((prev) => [mapped, ...prev]);
-        return mapped;
-      }
-    } catch {
-      // Offline fallback
-    }
-    const temp: ContentItem = {
-      id: `local-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
-      platform: item.platform,
-      format: item.format as ContentItem['format'],
-      title: item.title,
-      stage: item.stage || 'ideation',
-      status: 'active',
-      assignee: item.assignee || '',
-      input: item.input || { topic: item.title },
-      output: item.output || {},
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    };
-    setContent((prev) => [temp, ...prev]);
-    return temp;
+    const { data, error } = await supabase
+      .from('content_items')
+      .insert(row)
+      .select('*')
+      .single();
+
+    if (error) throw new Error(error.message);
+    if (!data) throw new Error('Content save returned no row.');
+
+    const mapped = mapRow(data as DbRow);
+    setContent((prev) => [mapped, ...prev]);
+    return mapped;
   }, []);
 
   return { content, dbLive, loading, addContent };

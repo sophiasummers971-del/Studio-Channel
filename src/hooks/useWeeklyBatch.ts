@@ -56,19 +56,20 @@ export function useWeeklyBatch() {
       try {
         const weekLabel = getCurrentWeekLabel();
 
-        // Look for an open batch with this week's label (or close-enough label)
-        const { data: existing } = await supabase
+        // Reuse only the open batch for the current week.
+        const { data: existing, error: existingError } = await supabase
           .from('approval_batches')
           .select('*')
           .eq('status', 'open')
+          .eq('week_label', weekLabel)
           .order('created_at', { ascending: false })
           .limit(1)
-          .single();
+          .maybeSingle();
+        if (existingError) throw existingError;
 
         let batchId: string;
 
-        if (existing && existing.week_label === weekLabel) {
-          // Reuse existing batch for this week
+        if (existing) {
           batchId = existing.id;
         } else {
           // Create a new batch for this week
@@ -108,7 +109,7 @@ export function useWeeklyBatch() {
   const addToBatch = useCallback(
     async (item: ContentItem) => {
       const { batchId } = state;
-      if (!batchId) return;
+      if (!batchId) throw new Error('Approval batch is not ready yet.');
 
       // Check if already in batch
       if (state.items.some((i) => i.contentId === item.id)) return;
@@ -123,29 +124,23 @@ export function useWeeklyBatch() {
         notes: '',
       };
 
-      try {
-        await supabase.from('approval_items').insert({
-          batch_id: batchId,
-          content_id: item.id,
-          title: item.title,
-          platform: item.platform,
-          format: item.format,
-          decision: 'pending',
-          reviewer: '',
-          notes: '',
-        });
+      const { error } = await supabase.from('approval_items').insert({
+        batch_id: batchId,
+        content_id: item.id,
+        title: item.title,
+        platform: item.platform,
+        format: item.format,
+        decision: 'pending',
+        reviewer: '',
+        notes: '',
+      });
 
-        setState((prev) => ({
-          ...prev,
-          items: [...prev.items, approvalItem],
-        }));
-      } catch {
-        // Optimistic update already happened in UI
-        setState((prev) => ({
-          ...prev,
-          items: [...prev.items, approvalItem],
-        }));
-      }
+      if (error) throw new Error(error.message);
+
+      setState((prev) => ({
+        ...prev,
+        items: [...prev.items, approvalItem],
+      }));
     },
     [state]
   );
