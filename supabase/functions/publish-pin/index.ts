@@ -111,6 +111,30 @@ serve(async (req: Request) => {
       );
     }
 
+    if (platform === "pinterest") {
+      if (!imageUrl) {
+        return new Response(
+          JSON.stringify({ error: "Pinterest requires a public HTTPS image URL." }),
+          { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+
+      try {
+        const parsed = new URL(imageUrl);
+        if (parsed.protocol !== "https:") {
+          return new Response(
+            JSON.stringify({ error: "Pinterest media URL must use HTTPS." }),
+            { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+          );
+        }
+      } catch {
+        return new Response(
+          JSON.stringify({ error: "Pinterest media URL is invalid." }),
+          { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+    }
+
     // Mark job as publishing
     await supabase
       .from("publish_jobs")
