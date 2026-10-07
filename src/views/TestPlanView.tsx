@@ -55,8 +55,7 @@ export function TestPlanView({ testPlan, onNavigateToGate }: TestPlanViewProps) 
       <div className="mb-6">
         <h2 className="text-2xl font-bold text-slate-100 mb-1">Test Plan</h2>
         <p className="text-sm text-slate-500">
-          Validation scenarios for the universal baseline workflow. Run all tests to confirm the
-          workflow is reliable, repeatable, and ready for deployment.
+          Live diagnostics against persisted Studio evidence. A green result requires real backend data; missing evidence stays unverified or failed.
         </p>
       </div>
 
@@ -72,7 +71,7 @@ export function TestPlanView({ testPlan, onNavigateToGate }: TestPlanViewProps) 
         <div className="bg-[#0b1118] border border-[#1b2935] rounded-xl p-4">
           <div className="flex items-center gap-2 mb-1">
             <AlertTriangle size={16} className="text-amber-500" />
-            <span className="text-xs text-slate-500">Warnings</span>
+            <span className="text-xs text-slate-500">Unverified</span>
           </div>
           <p className="text-2xl font-bold text-slate-100">{warningCount}</p>
         </div>
@@ -104,7 +103,7 @@ export function TestPlanView({ testPlan, onNavigateToGate }: TestPlanViewProps) 
           }`}
         >
           {running ? <Loader2 size={16} className="animate-spin" /> : <PlayCircle size={16} />}
-          {running ? 'Running Tests...' : 'Run All Tests'}
+          {running ? 'Running Diagnostics...' : 'Run Live Diagnostics'}
         </button>
         <button
           onClick={resetTests}
@@ -284,7 +283,7 @@ export function TestPlanView({ testPlan, onNavigateToGate }: TestPlanViewProps) 
                     </div>
                   </div>
 
-                  {/* Test Result */}
+                  {/* Diagnostic Result */}
                   {result && status !== 'not-run' && (
                     <div className="mt-4 p-3 rounded-lg" style={{ backgroundColor: statusCfg.bg }}>
                       <div className="flex items-center gap-2 mb-1.5">

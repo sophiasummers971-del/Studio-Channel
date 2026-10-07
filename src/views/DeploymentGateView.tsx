@@ -77,8 +77,7 @@ export function DeploymentGateView({ testPlan }: DeploymentGateViewProps) {
       <div className="mb-6">
         <h2 className="text-2xl font-bold text-slate-100 mb-1">Deployment Gate</h2>
         <p className="text-sm text-slate-500">
-          Confirm deployment readiness. The gate opens only when all critical tests pass, blockers
-          are resolved, and the required checklist is complete.
+          Evidence gate for deployment readiness. This screen does not deploy anything. It can only record a readiness decision after live diagnostics pass.
         </p>
       </div>
 
@@ -105,12 +104,12 @@ export function DeploymentGateView({ testPlan }: DeploymentGateViewProps) {
           <div className="flex-1">
             <h3 className={`text-sm font-semibold ${canDeploy ? 'text-emerald-800' : 'text-amber-200/80'}`}>
               {canDeploy
-                ? 'Deployment Ready — All gates passed'
-                : 'Not Ready — Complete remaining requirements'}
+                ? 'Evidence Ready — all required gates passed'
+                : 'Evidence Incomplete — deployment remains locked'}
             </h3>
             <p className={`text-xs mt-0.5 ${canDeploy ? 'text-emerald-400' : 'text-amber-600'}`}>
               {canDeploy
-                ? 'The universal baseline workflow has passed validation and is cleared for deployment.'
+                ? 'Live diagnostics and required operator attestations support a readiness decision.'
                 : `${requiredCount - requiredChecked} required checklist items pending, ${openBlockers.length} blocker(s) to resolve before deployment.`}
             </p>
           </div>
@@ -269,7 +268,7 @@ export function DeploymentGateView({ testPlan }: DeploymentGateViewProps) {
           }`}
         >
           {canDeploy ? <Rocket size={16} /> : <Lock size={16} />}
-          {canDeploy ? 'Deploy Now' : 'Gate Locked'}
+          {canDeploy ? 'Record Ready Decision' : 'Evidence Gate Locked'}
         </button>
       </div>
     </div>

@@ -387,35 +387,26 @@ function mapAiItem(item: AiGeneratedItem, platform: PlatformId, index: number): 
 
 /**
  * Generate content using AI (OpenAI via Supabase Edge Function).
- * Falls back to template-based generation if the API is unavailable.
+ * AI mode never silently falls back to templates. If the real call fails,
+ * the caller must surface the error so the operator knows AI did not run.
  */
 export async function generateContentAI(input: GenerationInput): Promise<ContentItem[]> {
-  try {
-    const { data, error } = await supabase.functions.invoke('generate-content', {
-      body: {
-        platform: input.platform,
-        topic: input.topic,
-        niche: input.niche,
-        tone: input.tone,
-        audience: input.audience,
-        count: input.count,
-      },
-    });
+  const { data, error } = await supabase.functions.invoke('generate-content', {
+    body: {
+      platform: input.platform,
+      topic: input.topic,
+      niche: input.niche,
+      tone: input.tone,
+      audience: input.audience,
+      count: input.count,
+    },
+  });
 
-    if (error) {
-      console.warn('AI generation failed, falling back to templates:', error.message);
-      return generateContent(input);
-    }
+  if (error) throw new Error(error.message);
+  if (data?.error) throw new Error(data.error);
 
-    if (data?.error) {
-      console.warn('AI generation error, falling back to templates:', data.error);
-      return generateContent(input);
-    }
+  const items: AiGeneratedItem[] = data?.items || [];
+  if (!items.length) throw new Error('AI generation returned no content items.');
 
-    const items: AiGeneratedItem[] = data?.items || [];
-    return items.map((item, i) => mapAiItem(item, input.platform, i));
-  } catch (err) {
-    console.warn('AI generation unavailable, falling back to templates:', err);
-    return generateContent(input);
-  }
+  return items.map((item, i) => mapAiItem(item, input.platform, i));
 }
