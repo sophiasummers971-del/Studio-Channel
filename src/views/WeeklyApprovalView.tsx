@@ -173,7 +173,7 @@ export function WeeklyApprovalView({ workflow }: WeeklyApprovalViewProps) {
                 >
                   <div
                     className={`w-5 h-5 rounded-md flex items-center justify-center shrink-0 transition-all ${
-                      checked ? 'bg-emerald-400/[0.045]0' : 'bg-[#0b1118] border border-slate-300'
+                      checked ? 'bg-emerald-500' : 'bg-[#0b1118] border border-slate-300'
                     }`}
                   >
                     {checked && <CheckSquare size={12} className="text-white" />}
@@ -197,7 +197,7 @@ export function WeeklyApprovalView({ workflow }: WeeklyApprovalViewProps) {
               disabled={!allChecked || pendingApprovals > 0}
               className={`flex items-center gap-1.5 px-4 py-2 text-sm font-medium rounded-lg transition-all ${
                 allChecked && pendingApprovals === 0
-                  ? 'bg-emerald-400/[0.045]0 text-white hover:bg-emerald-600 shadow-sm'
+                  ? 'bg-emerald-500 text-white hover:bg-emerald-600 shadow-sm'
                   : 'bg-slate-200 text-slate-400 cursor-not-allowed'
               }`}
             >
@@ -262,7 +262,7 @@ export function WeeklyApprovalView({ workflow }: WeeklyApprovalViewProps) {
                         onClick={() => handleDecision(item.contentId, 'approved')}
                         className={`flex items-center gap-1 px-2.5 py-1.5 text-xs font-medium rounded-lg transition-colors ${
                           item.decision === 'approved'
-                            ? 'bg-emerald-400/[0.045]0 text-white'
+                            ? 'bg-emerald-500 text-white'
                             : 'bg-emerald-400/[0.045] text-emerald-400 hover:bg-emerald-100'
                         }`}
                       >
@@ -273,7 +273,7 @@ export function WeeklyApprovalView({ workflow }: WeeklyApprovalViewProps) {
                         onClick={() => handleDecision(item.contentId, 'revisions')}
                         className={`flex items-center gap-1 px-2.5 py-1.5 text-xs font-medium rounded-lg transition-colors ${
                           item.decision === 'revisions'
-                            ? 'bg-amber-400/[0.05]0 text-white'
+                            ? 'bg-amber-500 text-white'
                             : 'bg-amber-400/[0.05] text-amber-600 hover:bg-amber-100'
                         }`}
                       >
