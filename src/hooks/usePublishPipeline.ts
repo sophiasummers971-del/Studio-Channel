@@ -155,8 +155,9 @@ export function usePublishPipeline() {
   }, [loadData]);
 
   const uploadMedia = useCallback(async (item: ScheduledContent, file: File) => {
-    if (!file.type.startsWith('image/')) {
-      throw new Error('Phase 1 media upload accepts images only.');
+    const allowedTypes = new Set(['image/jpeg', 'image/png', 'image/webp']);
+    if (!allowedTypes.has(file.type)) {
+      throw new Error('Use a JPEG, PNG, or WebP image.');
     }
     if (file.size > 10 * 1024 * 1024) {
       throw new Error('Image must be 10 MB or smaller.');
