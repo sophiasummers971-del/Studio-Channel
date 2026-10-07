@@ -128,7 +128,7 @@ export function ContentGeneratorView() {
         </div>
         {dbLive && (
           <span className="inline-flex items-center gap-1.5 text-xs font-medium text-emerald-400 bg-emerald-400/[0.045] px-2.5 py-1 rounded-full border border-emerald-400/20 ml-14">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400/[0.045]0 animate-pulse" />
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
             Connected to Supabase
           </span>
         )}
