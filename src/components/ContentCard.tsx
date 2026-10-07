@@ -18,7 +18,7 @@ export function ContentCard({ item, onClick, compact }: ContentCardProps) {
   return (
     <button
       onClick={() => onClick?.(item)}
-      className="group w-full text-left bg-white border border-slate-200 rounded-xl p-4 hover:shadow-lg hover:border-slate-300 transition-all duration-200 hover:-translate-y-0.5"
+      className="group w-full text-left bg-[#0b1118] border border-[#1b2935] rounded-xl p-4 hover:shadow-lg hover:border-slate-300 transition-all duration-200 hover:-translate-y-0.5"
     >
       <div className="flex items-start justify-between gap-3 mb-3">
         <div className="flex items-center gap-2">
@@ -38,7 +38,7 @@ export function ContentCard({ item, onClick, compact }: ContentCardProps) {
         </span>
       </div>
 
-      <h3 className="text-sm font-semibold text-slate-900 mb-2 line-clamp-2 group-hover:text-sky-600 transition-colors">
+      <h3 className="text-sm font-semibold text-slate-100 mb-2 line-clamp-2 group-hover:text-sky-600 transition-colors">
         {item.title}
       </h3>
 
@@ -55,11 +55,11 @@ export function ContentCard({ item, onClick, compact }: ContentCardProps) {
         </div>
       )}
 
-      <div className="mt-3 pt-3 border-t border-slate-100 flex items-center justify-between">
+      <div className="mt-3 pt-3 border-t border-[#14202a] flex items-center justify-between">
         <div className="flex items-center gap-1.5">
           {Object.keys(item.output).length > 0 ? (
-            <span className="text-[10px] text-emerald-600 font-medium flex items-center gap-1">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+            <span className="text-[10px] text-emerald-400 font-medium flex items-center gap-1">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400/[0.045]0" />
               Output ready
             </span>
           ) : (
