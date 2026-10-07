@@ -7,6 +7,7 @@ interface TopBarProps {
   activePlatform: PlatformId | null;
   onSearch: (query: string) => void;
   searchQuery: string;
+  onNewContent: () => void;
 }
 
 const VIEW_LABELS: Record<ViewId, string> = {
@@ -32,7 +33,7 @@ const VIEW_LABELS: Record<ViewId, string> = {
   'publish-handoff': 'Publish Handoff',
 };
 
-export function TopBar({ activeView, activePlatform, onSearch, searchQuery }: TopBarProps) {
+export function TopBar({ activeView, activePlatform, onSearch, searchQuery, onNewContent }: TopBarProps) {
   const platform = activePlatform ? getPlatform(activePlatform) : null;
   const breadcrumb = platform
     ? [VIEW_LABELS[activeView], platform.label]
@@ -68,7 +69,7 @@ export function TopBar({ activeView, activePlatform, onSearch, searchQuery }: To
           <button className="relative p-2 rounded-lg hover:bg-slate-100 transition-colors">
             <Bell size={18} className="text-slate-600" />
           </button>
-          <button className="flex items-center gap-2 px-4 py-2 bg-slate-900 text-white text-sm font-medium rounded-lg hover:bg-slate-800 transition-all shadow-sm hover:shadow-md">
+          <button onClick={onNewContent} className="flex items-center gap-2 px-4 py-2 bg-slate-900 text-white text-sm font-medium rounded-lg hover:bg-slate-800 transition-all shadow-sm hover:shadow-md">
             <Plus size={16} />
             New Content
           </button>
