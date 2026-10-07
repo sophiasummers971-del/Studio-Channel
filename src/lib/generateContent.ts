@@ -5,6 +5,7 @@
  */
 
 import type { PlatformId, ContentItem, ContentStage } from '@/types';
+import { supabase } from '@/lib/supabase';
 
 export interface GenerationInput {
   platform: PlatformId;
@@ -333,8 +334,6 @@ export function generateContent(input: GenerationInput): ContentItem[] {
 
 // ── AI-powered content generation via Supabase Edge Function ──
 
-const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL as string;
-
 interface AiGeneratedItem {
   title?: string;
   caption?: string;
@@ -392,34 +391,28 @@ function mapAiItem(item: AiGeneratedItem, platform: PlatformId, index: number): 
  */
 export async function generateContentAI(input: GenerationInput): Promise<ContentItem[]> {
   try {
-    const response = await fetch(`${SUPABASE_URL}/functions/v1/generate-content`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
-      },
-      body: JSON.stringify({
+    const { data, error } = await supabase.functions.invoke('generate-content', {
+      body: {
         platform: input.platform,
         topic: input.topic,
         niche: input.niche,
         tone: input.tone,
         audience: input.audience,
         count: input.count,
-      }),
+      },
     });
 
-    if (!response.ok) {
-      console.warn('AI generation failed, falling back to templates:', response.status);
+    if (error) {
+      console.warn('AI generation failed, falling back to templates:', error.message);
       return generateContent(input);
     }
 
-    const data = await response.json();
-    if (data.error) {
+    if (data?.error) {
       console.warn('AI generation error, falling back to templates:', data.error);
       return generateContent(input);
     }
 
-    const items: AiGeneratedItem[] = data.items || [];
+    const items: AiGeneratedItem[] = data?.items || [];
     return items.map((item, i) => mapAiItem(item, input.platform, i));
   } catch (err) {
     console.warn('AI generation unavailable, falling back to templates:', err);
