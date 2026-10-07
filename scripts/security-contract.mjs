@@ -128,4 +128,17 @@ assert.match(authCallback, /api\.linkedin\.com\/v2\/userinfo/,
 assert.match(authCallback, /ig_exchange_token/,
   'Instagram short-lived token must be upgraded server-side before storage');
 
+assert.match(generateContent, /\/v1\/responses/,
+  'AI generation must use the current Responses API');
+assert.doesNotMatch(generateContent, /\/v1\/chat\/completions/,
+  'legacy Chat Completions call must be removed from Studio generator');
+assert.match(generateContent, /OPENAI_MODEL/,
+  'AI model must be configurable server-side');
+assert.match(generateContent, /gpt-6-luna/,
+  'cost-sensitive current model must be the default');
+assert.match(generateContent, /json_schema/,
+  'AI output must use Structured Outputs JSON schema');
+assert.match(generateContent, /strict:\s*true/,
+  'AI output schema must use strict mode');
+
 console.log('security contract: PASS');
