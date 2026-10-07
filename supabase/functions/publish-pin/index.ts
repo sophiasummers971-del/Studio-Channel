@@ -1,7 +1,8 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { corsHeaders } from "../_shared/cors.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-import { OperatorAuthError, operatorErrorResponse, requireOperator } from "../_shared/requireOperator.ts";
+import { operatorErrorResponse, requireOperator } from "../_shared/requireOperator.ts";
+import { getPinterestAccessToken } from "../_shared/pinterestCredentials.ts";
 
 interface PublishRequest {
   jobId: string;
@@ -17,17 +18,6 @@ interface PublishRequest {
 }
 
 // ── Pinterest API helpers ──
-
-async function getPinterestAccessToken(supabase: ReturnType<typeof createClient>, provider: string): Promise<string | null> {
-  const { data, error } = await supabase
-    .from("oauth_credentials")
-    .select("access_token")
-    .eq("provider", provider)
-    .single();
-
-  if (error || !data?.access_token) return null;
-  return data.access_token;
-}
 
 async function listPinterestBoards(accessToken: string): Promise<{ id: string; name: string }[]> {
   const resp = await fetch("https://api.pinterest.com/v5/boards?page_size=25", {
@@ -139,7 +129,7 @@ serve(async (req: Request) => {
     }
 
     // Get Pinterest access token
-    const accessToken = await getPinterestAccessToken(supabase, "pinterest");
+    const accessToken = await getPinterestAccessToken(supabase);
     if (!accessToken) {
       await supabase
         .from("publish_jobs")
