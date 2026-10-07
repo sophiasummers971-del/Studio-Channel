@@ -110,7 +110,7 @@ export function useAccountConnections() {
     });
 
     if (error) throw error;
-    if (!data?.authorizeUrl) throw new Error('Provider authorization URL was not returned.');
+    if (!data?.authorizeUrl) throw new Error(data?.error || 'Provider authorization URL was not returned.');
 
     window.location.assign(data.authorizeUrl);
   }, []);
