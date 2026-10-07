@@ -1,6 +1,5 @@
 // Platform OAuth configuration.
-// Values are injected at deploy time via `supabase secrets set`.
-// Frontend-facing values (client ids + redirect URI) can be public.
+// Secrets stay in Supabase Edge Function environment variables.
 
 export interface OAuthConfig {
   provider: string;
@@ -9,10 +8,13 @@ export interface OAuthConfig {
   clientIdEnv: string;
   clientSecretEnv: string;
   scopes: string;
-  redirectPath: string;
 }
 
-export const REDIRECT_BASE = Deno.env.get('APP_URL') ?? 'http://localhost:5173';
+export const APP_URL = Deno.env.get('APP_URL') ?? 'https://channel-studio.pages.dev';
+const supabaseUrl = Deno.env.get('SUPABASE_URL') ?? '';
+export const OAUTH_CALLBACK_URL =
+  Deno.env.get('OAUTH_CALLBACK_URL') ||
+  (supabaseUrl ? `${supabaseUrl}/functions/v1/auth_callback` : '');
 
 export const OAUTH_PROVIDERS: Record<string, OAuthConfig> = {
   instagram: {
@@ -22,7 +24,6 @@ export const OAUTH_PROVIDERS: Record<string, OAuthConfig> = {
     clientIdEnv: 'INSTAGRAM_CLIENT_ID',
     clientSecretEnv: 'INSTAGRAM_CLIENT_SECRET',
     scopes: 'user_profile,user_media',
-    redirectPath: '/auth/instagram/callback',
   },
   facebook: {
     provider: 'facebook',
@@ -31,7 +32,6 @@ export const OAUTH_PROVIDERS: Record<string, OAuthConfig> = {
     clientIdEnv: 'FACEBOOK_CLIENT_ID',
     clientSecretEnv: 'FACEBOOK_CLIENT_SECRET',
     scopes: 'pages_show_list,pages_read_engagement,pages_manage_posts',
-    redirectPath: '/auth/facebook/callback',
   },
   tiktok: {
     provider: 'tiktok',
@@ -40,7 +40,6 @@ export const OAUTH_PROVIDERS: Record<string, OAuthConfig> = {
     clientIdEnv: 'TIKTOK_CLIENT_ID',
     clientSecretEnv: 'TIKTOK_CLIENT_SECRET',
     scopes: 'user.info.basic,video.upload,video.publish',
-    redirectPath: '/auth/tiktok/callback',
   },
   pinterest: {
     provider: 'pinterest',
@@ -48,8 +47,7 @@ export const OAUTH_PROVIDERS: Record<string, OAuthConfig> = {
     tokenUrl: 'https://api.pinterest.com/v5/oauth/token',
     clientIdEnv: 'PINTEREST_CLIENT_ID',
     clientSecretEnv: 'PINTEREST_CLIENT_SECRET',
-    scopes: 'boards:read,pins:read,pins:write',
-    redirectPath: '/auth/pinterest/callback',
+    scopes: 'boards:read,boards:write,pins:read,pins:write',
   },
   linkedin: {
     provider: 'linkedin',
@@ -58,7 +56,6 @@ export const OAUTH_PROVIDERS: Record<string, OAuthConfig> = {
     clientIdEnv: 'LINKEDIN_CLIENT_ID',
     clientSecretEnv: 'LINKEDIN_CLIENT_SECRET',
     scopes: 'w_member_social,r_liteprofile,r_emailaddress',
-    redirectPath: '/auth/linkedin/callback',
   },
 };
 
