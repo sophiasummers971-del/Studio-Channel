@@ -49,7 +49,7 @@ function App() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 flex">
+    <div className="min-h-screen bg-[#05070b] text-slate-200 flex">
       <a href="#main-content" className="skip-link">
         Skip to content
       </a>
@@ -69,7 +69,7 @@ function App() {
           onNewContent={() => handleNavigate('content-generator')}
         />
 
-        <main id="main-content" className="flex-1 overflow-y-auto">
+        <main id="main-content" className="flex-1 overflow-y-auto bg-transparent">
           {activeView === 'dashboard' && (
             <DashboardHome
               onPlatformSelect={handlePlatformSelect}
