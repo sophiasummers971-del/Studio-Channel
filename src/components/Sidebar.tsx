@@ -81,21 +81,21 @@ export function Sidebar({ activeView, activePlatform, onNavigate, onPlatformSele
         onClick={() => onNavigate(item.view)}
         className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-all duration-200 ${
           isActive
-            ? 'bg-sky-500/10 text-sky-400 font-medium'
-            : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'
+            ? 'bg-cyan-400/[0.08] text-cyan-300 font-medium border border-cyan-400/10'
+            : 'text-slate-400 hover:text-slate-200 hover:bg-white/[0.025]'
         }`}
       >
-        <Icon size={18} className={isActive ? 'text-sky-400' : 'text-slate-500'} />
+        <Icon size={18} className={isActive ? 'text-cyan-300' : 'text-slate-500'} />
         <span>{item.label}</span>
       </button>
     );
   };
 
   return (
-    <aside className="w-64 shrink-0 bg-slate-900 border-r border-slate-800 flex flex-col h-screen sticky top-0">
-      <div className="px-6 py-5 border-b border-slate-800">
+    <aside className="w-64 shrink-0 bg-[#070b10] border-r border-[#16222d] flex flex-col h-screen sticky top-0">
+      <div className="px-6 py-5 border-b border-[#16222d]">
         <div className="flex items-center gap-2.5">
-          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-sky-500 to-teal-400 flex items-center justify-center shadow-lg shadow-sky-500/20">
+          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-cyan-400 via-sky-500 to-violet-500 flex items-center justify-center shadow-lg shadow-cyan-500/10">
             <Workflow size={20} className="text-white" />
           </div>
           <div>
@@ -130,7 +130,7 @@ export function Sidebar({ activeView, activePlatform, onNavigate, onPlatformSele
                   className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-all duration-200 group ${
                     isActive
                       ? 'bg-slate-800 text-white font-medium'
-                      : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'
+                      : 'text-slate-400 hover:text-slate-200 hover:bg-white/[0.025]'
                   }`}
                 >
                   <span
@@ -151,7 +151,7 @@ export function Sidebar({ activeView, activePlatform, onNavigate, onPlatformSele
           <button
             type="button"
             onClick={() => setSystemOpen((open) => !open)}
-            className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-slate-400 hover:text-slate-200 hover:bg-slate-800/50"
+            className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-slate-400 hover:text-slate-200 hover:bg-white/[0.025]"
             aria-expanded={systemOpen}
           >
             <Settings2 size={18} className="text-slate-500" />
@@ -160,17 +160,17 @@ export function Sidebar({ activeView, activePlatform, onNavigate, onPlatformSele
           </button>
 
           {systemOpen && (
-            <div className="mt-2 ml-2 pl-2 border-l border-slate-800 space-y-1">
+            <div className="mt-2 ml-2 pl-2 border-l border-[#16222d] space-y-1">
               {SYSTEM_NAV.map(renderNavButton)}
             </div>
           )}
         </section>
       </nav>
 
-      <div className="px-4 py-4 border-t border-slate-800">
+      <div className="px-4 py-4 border-t border-[#16222d]">
         <div className="flex items-center gap-2 text-xs text-slate-500">
           <div className="w-2 h-2 rounded-full bg-emerald-500" />
-          <span>Secure workspace</span>
+          <span>OPERATOR SESSION SECURE</span>
         </div>
       </div>
     </aside>
