@@ -131,6 +131,7 @@ using (
   )
 );
 
+
 create index if not exists idx_content_items_media_asset
   on public.content_items(media_asset_id);
 
