@@ -380,7 +380,7 @@ export function PublishHandoffView() {
                         {uploadingMedia.has(item.id) ? 'Uploading…' : item.output.mediaUrl ? 'Replace' : 'Upload image'}
                         <input
                           type="file"
-                          accept="image/*"
+                          accept="image/jpeg,image/png,image/webp"
                           className="hidden"
                           disabled={uploadingMedia.has(item.id)}
                           onChange={(e) => {
