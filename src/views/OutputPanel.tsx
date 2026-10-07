@@ -33,7 +33,7 @@ export function OutputPanel() {
       <div className="mb-6">
         <div className="flex items-center gap-2 mb-1">
           <ArrowUp size={18} className="text-emerald-500" />
-          <h2 className="text-2xl font-bold text-slate-900">Standard Outputs</h2>
+          <h2 className="text-2xl font-bold text-slate-100">Standard Outputs</h2>
         </div>
         <p className="text-sm text-slate-500">
           The universal output model the workflow produces for every content item
@@ -46,16 +46,16 @@ export function OutputPanel() {
           return (
             <div
               key={field.key}
-              className="flex items-start gap-3 bg-white border border-slate-200 rounded-xl p-4 hover:shadow-sm transition-shadow"
+              className="flex items-start gap-3 bg-[#0b1118] border border-[#1b2935] rounded-xl p-4 hover:shadow-sm transition-shadow"
             >
-              <div className="w-10 h-10 rounded-lg bg-emerald-50 flex items-center justify-center shrink-0">
-                <Icon size={18} className="text-emerald-600" />
+              <div className="w-10 h-10 rounded-lg bg-emerald-400/[0.045] flex items-center justify-center shrink-0">
+                <Icon size={18} className="text-emerald-400" />
               </div>
               <div className="flex-1">
-                <p className="text-sm font-semibold text-slate-800">{field.label}</p>
+                <p className="text-sm font-semibold text-slate-200">{field.label}</p>
                 <p className="text-xs text-slate-500 mt-0.5">{field.description}</p>
               </div>
-              <span className="text-[10px] font-medium text-slate-400 bg-slate-100 px-2 py-1 rounded-full">
+              <span className="text-[10px] font-medium text-slate-400 bg-[#101820] px-2 py-1 rounded-full">
                 Universal
               </span>
             </div>
@@ -65,9 +65,9 @@ export function OutputPanel() {
 
       {sampleItem && (
         <div>
-          <h3 className="text-sm font-semibold text-slate-700 mb-3">Sample Output</h3>
-          <div className="bg-white border border-slate-200 rounded-xl p-5">
-            <div className="flex items-center gap-2 mb-4 pb-4 border-b border-slate-100">
+          <h3 className="text-sm font-semibold text-slate-300 mb-3">Sample Output</h3>
+          <div className="bg-[#0b1118] border border-[#1b2935] rounded-xl p-5">
+            <div className="flex items-center gap-2 mb-4 pb-4 border-b border-[#14202a]">
               <span
                 className="w-7 h-7 rounded-lg flex items-center justify-center text-[10px] font-bold"
                 style={{
@@ -77,7 +77,7 @@ export function OutputPanel() {
               >
                 {getPlatform(sampleItem.platform)?.label[0]}
               </span>
-              <span className="text-sm font-medium text-slate-700">{sampleItem.title}</span>
+              <span className="text-sm font-medium text-slate-300">{sampleItem.title}</span>
               <span className="text-xs text-slate-400">
                 · {getFormat(sampleItem.format)?.label}
               </span>
@@ -88,13 +88,13 @@ export function OutputPanel() {
                 if (!value) return null;
                 const Icon = field.icon;
                 return (
-                  <div key={field.key} className="flex items-start gap-3 bg-slate-50 rounded-lg p-3">
+                  <div key={field.key} className="flex items-start gap-3 bg-[#070b10] rounded-lg p-3">
                     <Icon size={15} className="text-slate-400 mt-0.5 shrink-0" />
                     <div className="flex-1">
                       <p className="text-[10px] font-semibold uppercase tracking-wide text-slate-400 mb-0.5">
                         {field.label}
                       </p>
-                      <p className="text-sm text-slate-700">
+                      <p className="text-sm text-slate-300">
                         {Array.isArray(value) ? value.join(' · ') : value}
                       </p>
                     </div>
@@ -106,8 +106,8 @@ export function OutputPanel() {
         </div>
       )}
 
-      <div className="mt-6 p-4 bg-emerald-50 border border-emerald-100 rounded-xl">
-        <p className="text-xs text-slate-600 leading-relaxed">
+      <div className="mt-6 p-4 bg-emerald-400/[0.045] border border-emerald-400/10 rounded-xl">
+        <p className="text-xs text-slate-400 leading-relaxed">
           <span className="font-semibold">Reusability:</span> Every platform writes to this same
           output schema. Platform-specific outputs can add fields without breaking the shared
           structure, so downstream systems always know where to find the core results.
