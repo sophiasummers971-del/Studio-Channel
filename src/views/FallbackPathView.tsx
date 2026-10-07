@@ -12,7 +12,7 @@ import {
   CheckCircle2,
   Circle,
   Lock,
-  Blueprint,
+  FileText,
 } from 'lucide-react';
 
 export function FallbackPathView() {
@@ -68,7 +68,7 @@ export function FallbackPathView() {
 
       <section className="mb-8">
         <div className="flex items-center gap-2 mb-4">
-          <Blueprint size={16} className="text-cyan-300" />
+          <FileText size={16} className="text-cyan-300" />
           <h3 className="text-sm font-semibold text-slate-300">Planned fallback sequence</h3>
         </div>
         <div className="space-y-2">
