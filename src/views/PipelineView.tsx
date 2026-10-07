@@ -13,13 +13,13 @@ export function PipelineView({ onItemClick }: PipelineViewProps) {
     <div className="p-8 max-w-[1600px] mx-auto">
       <div className="mb-6 flex items-start justify-between">
         <div>
-          <h2 className="text-2xl font-bold text-slate-900 mb-1">Content Pipeline</h2>
+          <h2 className="text-2xl font-bold text-slate-100 mb-1">Content Pipeline</h2>
           <p className="text-sm text-slate-500">
             Track content as it moves through the universal workflow stages
           </p>
         </div>
         {dbLive && (
-          <span className="flex items-center gap-1.5 text-xs font-medium text-emerald-700 bg-emerald-50 border border-emerald-200 px-2.5 py-1.5 rounded-full">
+          <span className="flex items-center gap-1.5 text-xs font-medium text-emerald-700 bg-emerald-400/[0.045] border border-emerald-400/20 px-2.5 py-1.5 rounded-full">
             <Database size={13} />
             Saved to database
           </span>
@@ -42,14 +42,14 @@ export function PipelineView({ onItemClick }: PipelineViewProps) {
                     className="w-2.5 h-2.5 rounded-full"
                     style={{ backgroundColor: stageInfo.color }}
                   />
-                  <h3 className="text-sm font-semibold text-slate-700">{stageInfo.label}</h3>
+                  <h3 className="text-sm font-semibold text-slate-300">{stageInfo.label}</h3>
                 </div>
-                <span className="text-xs font-medium text-slate-400 bg-slate-100 px-2 py-0.5 rounded-full">
+                <span className="text-xs font-medium text-slate-400 bg-[#101820] px-2 py-0.5 rounded-full">
                   {items.length}
                 </span>
               </div>
 
-              <div className="bg-slate-50 rounded-xl p-2 min-h-[200px] space-y-2">
+              <div className="bg-[#070b10] rounded-xl p-2 min-h-[200px] space-y-2">
                 {items.length === 0 ? (
                   <div className="flex items-center justify-center h-32 text-xs text-slate-400">
                     No items
@@ -63,7 +63,7 @@ export function PipelineView({ onItemClick }: PipelineViewProps) {
                       <button
                         key={item.id}
                         onClick={() => onItemClick(item)}
-                        className="group w-full text-left bg-white border border-slate-200 rounded-lg p-3 hover:shadow-md hover:border-slate-300 transition-all"
+                        className="group w-full text-left bg-[#0b1118] border border-[#1b2935] rounded-lg p-3 hover:shadow-md hover:border-slate-300 transition-all"
                       >
                         <div className="flex items-center gap-1.5 mb-2">
                           <span
@@ -76,7 +76,7 @@ export function PipelineView({ onItemClick }: PipelineViewProps) {
                             {platform.label} · {format.label}
                           </span>
                         </div>
-                        <p className="text-xs font-medium text-slate-800 line-clamp-2 group-hover:text-sky-600 transition-colors">
+                        <p className="text-xs font-medium text-slate-200 line-clamp-2 group-hover:text-sky-600 transition-colors">
                           {item.title}
                         </p>
                         <p className="text-[10px] text-slate-400 mt-1.5">{item.assignee}</p>
