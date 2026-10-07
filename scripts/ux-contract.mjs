@@ -18,6 +18,9 @@ const fallbackView = read('src/views/FallbackPathView.tsx');
 const rolloutView = read('src/views/ChannelRolloutView.tsx');
 const platformView = read('src/views/PlatformSection.tsx');
 const deploymentGate = read('src/views/DeploymentGateView.tsx');
+const handoffView = read('src/views/HandoffFlow.tsx');
+const inputPanel = read('src/views/InputPanel.tsx');
+const outputPanel = read('src/views/OutputPanel.tsx');
 
 for (const label of ['Home', 'Create', 'Approvals', 'Publish', 'Accounts']) {
   assert.match(sidebar, new RegExp(`label: ['"]${label}['"]`),
@@ -69,6 +72,12 @@ assert.doesNotMatch(platformView, /MOCK_CONTENT/,
   'channel pages must render live content only');
 assert.doesNotMatch(deploymentGate, /Deploy Now/,
   'evidence gate must never pretend a local button performs deployment');
+assert.doesNotMatch(handoffView, /MOCK_CONTENT/,
+  'handoff flow must use live content evidence');
+assert.match(inputPanel, /REFERENCE ONLY/,
+  'schema input samples must be labeled as reference data');
+assert.match(outputPanel, /REFERENCE ONLY/,
+  'schema output samples must be labeled as reference data');
 
 assert.match(topbar, /onNewContent/,
   'top bar must accept a working new-content action');
