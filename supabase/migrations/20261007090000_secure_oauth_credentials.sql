@@ -6,9 +6,13 @@ create table if not exists public.oauth_credentials (
   access_token text not null,
   refresh_token text,
   expires_at timestamptz,
+  refresh_token_expires_at timestamptz,
   external_id text,
   updated_at timestamptz not null default now()
 );
+
+alter table public.oauth_credentials
+  add column if not exists refresh_token_expires_at timestamptz;
 
 alter table public.oauth_credentials enable row level security;
 revoke all on table public.oauth_credentials from anon, authenticated;
