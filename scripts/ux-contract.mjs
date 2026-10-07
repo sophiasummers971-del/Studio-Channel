@@ -11,6 +11,13 @@ const styles = read('src/index.css');
 const workflowHook = read('src/hooks/useWorkflow.ts');
 const weeklyBatchHook = read('src/hooks/useWeeklyBatch.ts');
 const generator = read('src/views/ContentGeneratorView.tsx');
+const generatorLib = read('src/lib/generateContent.ts');
+const testPlanHook = read('src/hooks/useTestPlan.ts');
+const workflowView = read('src/views/UniversalWorkflowView.tsx');
+const fallbackView = read('src/views/FallbackPathView.tsx');
+const rolloutView = read('src/views/ChannelRolloutView.tsx');
+const platformView = read('src/views/PlatformSection.tsx');
+const deploymentGate = read('src/views/DeploymentGateView.tsx');
 
 for (const label of ['Home', 'Create', 'Approvals', 'Publish', 'Accounts']) {
   assert.match(sidebar, new RegExp(`label: ['"]${label}['"]`),
@@ -42,6 +49,26 @@ assert.match(weeklyBatchHook, /maybeSingle\(\)/,
   'weekly batch lookup must tolerate an empty result without a 406');
 assert.match(generator, /Save failed:/,
   'generator must surface persistence failures to the operator');
+assert.match(generator, /AI generation failed:/,
+  'AI mode must surface real generation failures');
+assert.doesNotMatch(generatorLib, /falling back to templates/i,
+  'AI mode must never silently substitute template output');
+assert.doesNotMatch(testPlanHook, /SIMULATED_RESULTS|setTimeout\(/,
+  'test plan must not manufacture simulated outcomes');
+assert.match(testPlanHook, /from\('workflow_runs'\)/,
+  'live diagnostics must inspect persisted workflow evidence');
+assert.doesNotMatch(workflowView, /MOCK_RUNS|Advance .*stage|Aug 16, 2026/,
+  'workflow evidence view must not render mock runs or manual fake progression');
+assert.match(fallbackView, /NOT IMPLEMENTED/,
+  'fallback view must disclose that production fallback is not implemented');
+assert.doesNotMatch(fallbackView, /triggerFallback|advanceFallbackStep|completeRecovery/,
+  'fallback view must not expose simulator controls as production operations');
+assert.doesNotMatch(rolloutView, /toggleEntryCriterion|toggleCheckpoint|activateStep|completeStep/,
+  'rollout view must not expose local simulator controls');
+assert.doesNotMatch(platformView, /MOCK_CONTENT/,
+  'channel pages must render live content only');
+assert.doesNotMatch(deploymentGate, /Deploy Now/,
+  'evidence gate must never pretend a local button performs deployment');
 
 assert.match(topbar, /onNewContent/,
   'top bar must accept a working new-content action');
