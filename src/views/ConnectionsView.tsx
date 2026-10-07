@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useAccountConnections } from '@/hooks/useAccountConnections';
 import {
   Instagram,
@@ -34,6 +34,19 @@ const CONNECTORS: ConnectorDef[] = [
 
 export function ConnectionsView() {
   const { connections, startOAuth, handleCallback, dbReady, loaded } = useAccountConnections();
+  const [oauthProvider, setOauthProvider] = useState<string | null>(null);
+  const [oauthError, setOauthError] = useState('');
+
+  const beginOAuth = async (provider: string) => {
+    setOauthError('');
+    setOauthProvider(provider);
+    try {
+      await startOAuth(provider);
+    } catch (error) {
+      setOauthProvider(null);
+      setOauthError(error instanceof Error ? error.message : 'Could not start provider authorization.');
+    }
+  };
 
   useEffect(() => {
     handleCallback();
@@ -109,23 +122,23 @@ export function ConnectionsView() {
                     )}
                   </div>
                   <button
-                    onClick={() => startOAuth(connector.id)}
+                    onClick={() => void beginOAuth(connector.id)}
                     className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-xs font-semibold bg-[#101820] text-slate-300 hover:bg-slate-200 transition-all"
                   >
                     <RefreshCw size={14} />
-                    Reauthorize securely
+                    {oauthProvider === connector.id ? 'Starting authorization…' : 'Reauthorize securely'}
                   </button>
                 </div>
               ) : (
                 <div className="space-y-3 flex-1 flex flex-col">
                   <p className="text-xs text-slate-500 leading-relaxed">{connector.note}</p>
                   <button
-                    onClick={() => startOAuth(connector.id)}
+                    onClick={() => void beginOAuth(connector.id)}
                     className="w-full flex items-center justify-center gap-2 px-3 py-2.5 rounded-lg text-xs font-semibold text-white hover:opacity-90 transition-all"
                     style={{ backgroundColor: connector.color }}
                   >
                     <KeyRound size={14} />
-                    Authorize {connector.label}
+                    {oauthProvider === connector.id ? 'Starting authorization…' : `Authorize ${connector.label}`}
                   </button>
                 </div>
               )}
@@ -133,6 +146,13 @@ export function ConnectionsView() {
           );
         })}
       </div>
+
+      {oauthError && (
+        <div className="mt-6 flex items-start gap-3 bg-rose-400/[0.05] border border-rose-400/15 rounded-xl px-4 py-3">
+          <AlertTriangle size={18} className="text-rose-400 mt-0.5 shrink-0" />
+          <p className="text-xs text-rose-200 leading-relaxed">{oauthError}</p>
+        </div>
+      )}
 
       <div className="mt-6 flex items-start gap-3 bg-cyan-400/[0.04] border border-cyan-400/10 rounded-xl px-4 py-3">
         <Info size={18} className="text-sky-500 mt-0.5 shrink-0" />
