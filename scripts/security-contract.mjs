@@ -11,7 +11,7 @@ const oauthConfig = read('supabase/functions/_shared/config.ts');
 const main = read('src/main.tsx');
 
 assert.ok(
-  existsSync('supabase/migrations/20261007090000_secure_oauth_credentials.sql'),
+  existsSync('supabase/migrations/20261007115132_secure_oauth_credentials.sql'),
   'secure OAuth migration must exist'
 );
 
@@ -44,7 +44,7 @@ assert.match(oauthConfig, /boards:write/,
   'Pinterest OAuth scopes must include boards:write because publish-pin can create boards');
 
 assert.ok(
-  existsSync('supabase/migrations/20261007093000_owner_auth_rls.sql'),
+  existsSync('supabase/migrations/20261007115140_owner_auth_rls.sql'),
   'owner-auth RLS migration must exist'
 );
 assert.ok(
