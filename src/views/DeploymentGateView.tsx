@@ -138,7 +138,7 @@ export function DeploymentGateView({ testPlan }: DeploymentGateViewProps) {
             >
               <div
                 className={`w-5 h-5 rounded-md flex items-center justify-center shrink-0 mt-0.5 transition-all ${
-                  item.checked ? 'bg-emerald-400/[0.045]0' : 'bg-[#0b1118] border border-slate-300'
+                  item.checked ? 'bg-emerald-500' : 'bg-[#0b1118] border border-slate-300'
                 }`}
               >
                 {item.checked ? (
