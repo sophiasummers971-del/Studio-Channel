@@ -214,7 +214,7 @@ export function ChannelRolloutView() {
                             >
                               <div
                                 className={`w-5 h-5 rounded-md flex items-center justify-center shrink-0 mt-0.5 transition-all ${
-                                  met ? 'bg-emerald-400/[0.045]0' : 'bg-[#0b1118] border border-slate-300'
+                                  met ? 'bg-emerald-500' : 'bg-[#0b1118] border border-slate-300'
                                 }`}
                               >
                                 {met ? (
@@ -264,7 +264,7 @@ export function ChannelRolloutView() {
                             >
                               <div
                                 className={`w-5 h-5 rounded-md flex items-center justify-center shrink-0 mt-0.5 transition-all ${
-                                  passed ? 'bg-emerald-400/[0.045]0' : 'bg-[#0b1118] border border-slate-300'
+                                  passed ? 'bg-emerald-500' : 'bg-[#0b1118] border border-slate-300'
                                 }`}
                               >
                                 {passed ? (
@@ -294,7 +294,7 @@ export function ChannelRolloutView() {
                       {step.status === 'locked' && canAct && (
                         <button
                           onClick={() => activateStep(step.id)}
-                          className="flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-white bg-cyan-400/[0.04]0 rounded-lg hover:bg-sky-600 transition-colors shadow-sm"
+                          className="flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-white bg-sky-500 rounded-lg hover:bg-sky-600 transition-colors shadow-sm"
                         >
                           <Rocket size={15} />
                           {isPhase ? 'Confirm & Proceed' : 'Activate Channel'}
@@ -313,7 +313,7 @@ export function ChannelRolloutView() {
                       {step.status === 'in-progress' && canComp && (
                         <button
                           onClick={() => completeStep(step.id)}
-                          className="flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-white bg-emerald-400/[0.045]0 rounded-lg hover:bg-emerald-600 transition-colors shadow-sm"
+                          className="flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-white bg-emerald-500 rounded-lg hover:bg-emerald-600 transition-colors shadow-sm"
                         >
                           <CheckCircle2 size={15} />
                           Complete & Pass
