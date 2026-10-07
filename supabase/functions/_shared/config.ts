@@ -19,11 +19,11 @@ export const OAUTH_CALLBACK_URL =
 export const OAUTH_PROVIDERS: Record<string, OAuthConfig> = {
   instagram: {
     provider: 'instagram',
-    authorizeUrl: 'https://api.instagram.com/oauth/authorize',
+    authorizeUrl: 'https://www.instagram.com/oauth/authorize',
     tokenUrl: 'https://api.instagram.com/oauth/access_token',
     clientIdEnv: 'INSTAGRAM_CLIENT_ID',
     clientSecretEnv: 'INSTAGRAM_CLIENT_SECRET',
-    scopes: 'user_profile,user_media',
+    scopes: 'instagram_business_basic,instagram_business_content_publish',
   },
   facebook: {
     provider: 'facebook',
@@ -55,7 +55,7 @@ export const OAUTH_PROVIDERS: Record<string, OAuthConfig> = {
     tokenUrl: 'https://www.linkedin.com/oauth/v2/accessToken',
     clientIdEnv: 'LINKEDIN_CLIENT_ID',
     clientSecretEnv: 'LINKEDIN_CLIENT_SECRET',
-    scopes: 'w_member_social,r_liteprofile,r_emailaddress',
+    scopes: 'openid profile email w_member_social',
   },
 };
 
