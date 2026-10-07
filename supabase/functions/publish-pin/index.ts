@@ -1,6 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { corsHeaders } from "../_shared/cors.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { operatorErrorResponse, requireOperator } from "../_shared/requireOperator.ts";
 import { getPinterestAccessToken } from "../_shared/pinterestCredentials.ts";
 
@@ -13,50 +12,158 @@ interface PublishRequest {
   boardName?: string;
   caption?: string;
   hashtags?: string[];
-  imageUrl?: string;       // direct URL to an image for the pin
-  link?: string;           // destination link when pin is clicked
+  imageUrl?: string;
+  link?: string;
 }
 
-// ── Pinterest API helpers ──
-
-async function listPinterestBoards(accessToken: string): Promise<{ id: string; name: string }[]> {
-  const resp = await fetch("https://api.pinterest.com/v5/boards?page_size=25", {
-    headers: { Authorization: `Bearer ${accessToken}` },
-  });
-  if (!resp.ok) return [];
-  const data = await resp.json();
-  return (data.items || []).map((b: Record<string, unknown>) => ({ id: b.id as string, name: b.name as string }));
+interface PinterestRuntime {
+  environment: "sandbox" | "production";
+  apiBaseUrl: string;
+  accessToken: string;
 }
 
-async function findOrCreateBoard(
+async function getPinterestRuntime(supabase: any): Promise<PinterestRuntime | null> {
+  const environment = (Deno.env.get("PINTEREST_API_ENV") || "production").trim().toLowerCase();
+
+  if (environment === "sandbox") {
+    const accessToken = Deno.env.get("PINTEREST_SANDBOX_ACCESS_TOKEN");
+    if (!accessToken) return null;
+    return {
+      environment: "sandbox",
+      apiBaseUrl: "https://api-sandbox.pinterest.com",
+      accessToken,
+    };
+  }
+
+  const accessToken = await getPinterestAccessToken(supabase);
+  if (!accessToken) return null;
+
+  return {
+    environment: "production",
+    apiBaseUrl: "https://api.pinterest.com",
+    accessToken,
+  };
+}
+
+async function listPinterestBoards(
+  apiBaseUrl: string,
   accessToken: string,
-  boardName: string
-): Promise<string | null> {
-  const boards = await listPinterestBoards(accessToken);
-  const existing = boards.find((b) => b.name.toLowerCase() === boardName.toLowerCase());
-  if (existing) return existing.id;
+): Promise<{ id: string; name: string }[]> {
+  const boards: { id: string; name: string }[] = [];
+  let bookmark: string | null = null;
+  let pages = 0;
 
-  // Create the board
-  const resp = await fetch("https://api.pinterest.com/v5/boards", {
+  do {
+    const params = new URLSearchParams({ page_size: "250" });
+    if (bookmark) params.set("bookmark", bookmark);
+
+    const resp = await fetch(`${apiBaseUrl}/v5/boards?${params.toString()}`, {
+      headers: { Authorization: `Bearer ${accessToken}` },
+    });
+
+    if (!resp.ok) {
+      const errText = await resp.text();
+      console.error("Pinterest list boards failed", {
+        status: resp.status,
+        error: errText.substring(0, 200),
+      });
+      return boards;
+    }
+
+    const data = await resp.json();
+    for (const b of data.items || []) {
+      if (b?.id && b?.name) {
+        boards.push({ id: String(b.id), name: String(b.name) });
+      }
+    }
+
+    bookmark = typeof data.bookmark === "string" && data.bookmark.length
+      ? data.bookmark
+      : null;
+
+    pages += 1;
+  } while (bookmark && pages < 20);
+
+  if (bookmark) {
+    console.warn("Pinterest board pagination stopped after safety limit", { pages });
+  }
+
+  return boards;
+}
+
+async function createPinterestBoard(
+  apiBaseUrl: string,
+  accessToken: string,
+  boardName: string,
+): Promise<{ id: string | null; code?: number }> {
+  const resp = await fetch(`${apiBaseUrl}/v5/boards`, {
     method: "POST",
     headers: {
       Authorization: `Bearer ${accessToken}`,
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({ name: boardName, description: `Auto-created by Channel Studio for ${boardName}` }),
+    body: JSON.stringify({
+      name: boardName,
+      description: `Auto-created by Channel Studio for ${boardName}`,
+    }),
   });
-  if (!resp.ok) return null;
-  const data = await resp.json();
-  return data.id || null;
+
+  const text = await resp.text();
+  let data: Record<string, unknown> = {};
+  try {
+    data = text ? JSON.parse(text) : {};
+  } catch {}
+
+  if (!resp.ok) {
+    console.error("Pinterest create board failed", {
+      status: resp.status,
+      error: text.substring(0, 200),
+    });
+    return {
+      id: null,
+      code: typeof data.code === "number" ? data.code : undefined,
+    };
+  }
+
+  return { id: typeof data.id === "string" ? data.id : null };
+}
+
+async function findOrCreateBoard(
+  apiBaseUrl: string,
+  accessToken: string,
+  boardName: string,
+): Promise<string | null> {
+  const boards = await listPinterestBoards(apiBaseUrl, accessToken);
+  const existing = boards.find((b) => b.name.toLowerCase() === boardName.toLowerCase());
+  if (existing) return existing.id;
+
+  const first = await createPinterestBoard(apiBaseUrl, accessToken, boardName);
+  if (first.id) return first.id;
+
+  const isSandbox = apiBaseUrl.includes("api-sandbox.pinterest.com");
+  if (isSandbox && first.code === 58) {
+    const suffix = new Date().toISOString().replace(/[-:.TZ]/g, "").slice(0, 14);
+    const fallbackName = `${boardName} Sandbox ${suffix}`;
+    console.warn("Pinterest Sandbox hid an existing board from list; creating unique fallback", {
+      requestedName: boardName,
+      fallbackName,
+    });
+
+    const fallback = await createPinterestBoard(apiBaseUrl, accessToken, fallbackName);
+    if (fallback.id) return fallback.id;
+  }
+
+  return null;
 }
 
 async function createPinterestPin(
+  apiBaseUrl: string,
   accessToken: string,
   boardId: string,
   title: string,
   description: string,
   imageUrl?: string,
-  link?: string
+  link?: string,
 ): Promise<{ id: string; link: string } | { error: string }> {
   const body: Record<string, unknown> = {
     board_id: boardId,
@@ -71,11 +178,9 @@ async function createPinterestPin(
     };
   }
 
-  if (link) {
-    body.link = link;
-  }
+  if (link) body.link = link;
 
-  const resp = await fetch("https://api.pinterest.com/v5/pins", {
+  const resp = await fetch(`${apiBaseUrl}/v5/pins`, {
     method: "POST",
     headers: {
       Authorization: `Bearer ${accessToken}`,
@@ -94,20 +199,29 @@ async function createPinterestPin(
   return { id: data.id, link: data.link || "" };
 }
 
-// ── Edge Function handler ──
-
 serve(async (req: Request) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
 
   try {
     const { admin: supabase } = await requireOperator(req);
     const body: PublishRequest = await req.json();
-    const { jobId, contentId, platform, pinTitle, pinDescription, boardName, caption, hashtags, imageUrl, link } = body;
+    const {
+      jobId,
+      contentId,
+      platform,
+      pinTitle,
+      pinDescription,
+      boardName,
+      caption,
+      hashtags,
+      imageUrl,
+      link,
+    } = body;
 
     if (!jobId || !contentId) {
       return new Response(
         JSON.stringify({ error: "jobId and contentId are required" }),
-        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } },
       );
     }
 
@@ -115,7 +229,7 @@ serve(async (req: Request) => {
       if (!imageUrl) {
         return new Response(
           JSON.stringify({ error: "Pinterest requires a public HTTPS image URL." }),
-          { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+          { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } },
         );
       }
 
@@ -124,82 +238,110 @@ serve(async (req: Request) => {
         if (parsed.protocol !== "https:") {
           return new Response(
             JSON.stringify({ error: "Pinterest media URL must use HTTPS." }),
-            { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+            { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } },
           );
         }
       } catch {
         return new Response(
           JSON.stringify({ error: "Pinterest media URL is invalid." }),
-          { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+          { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } },
         );
       }
     }
 
-    // Mark job as publishing
     await supabase
       .from("publish_jobs")
-      .update({ status: "publishing", attempt_count: supabase.rpc ? 1 : 1, last_attempt_at: new Date().toISOString() })
+      .update({
+        status: "publishing",
+        attempt_count: 1,
+        last_attempt_at: new Date().toISOString(),
+      })
       .eq("id", jobId);
 
     if (platform !== "pinterest") {
       await supabase
         .from("publish_jobs")
-        .update({ status: "failed", error_message: `Platform ${platform} not yet supported. Pinterest is the first integration.` })
+        .update({
+          status: "failed",
+          error_message: `Platform ${platform} not yet supported. Pinterest is the first integration.`,
+        })
         .eq("id", jobId);
+
       return new Response(
         JSON.stringify({ error: `Platform ${platform} not yet supported` }),
-        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } },
       );
     }
 
-    // Get Pinterest access token
-    const accessToken = await getPinterestAccessToken(supabase);
-    if (!accessToken) {
+    const pinterest = await getPinterestRuntime(supabase);
+    if (!pinterest) {
+      const env = (Deno.env.get("PINTEREST_API_ENV") || "production").trim().toLowerCase();
+      const message = env === "sandbox"
+        ? "Pinterest Sandbox is selected but PINTEREST_SANDBOX_ACCESS_TOKEN is not configured."
+        : "No Pinterest production access token. Connect your Pinterest account first.";
+
       await supabase
         .from("publish_jobs")
-        .update({ status: "failed", error_message: "No Pinterest access token. Connect your Pinterest account first." })
+        .update({ status: "failed", error_message: message })
         .eq("id", jobId);
+
       return new Response(
-        JSON.stringify({ error: "No Pinterest access token" }),
-        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        JSON.stringify({ error: message }),
+        { status: 503, headers: { ...corsHeaders, "Content-Type": "application/json" } },
       );
     }
 
-    // Find or create board
-    const boardId = await findOrCreateBoard(accessToken, boardName || "Channel Studio Pins");
+    const boardId = await findOrCreateBoard(
+      pinterest.apiBaseUrl,
+      pinterest.accessToken,
+      boardName || "Channel Studio Pins",
+    );
+
     if (!boardId) {
+      const message = `Could not find or create Pinterest board in ${pinterest.environment}.`;
+
       await supabase
         .from("publish_jobs")
-        .update({ status: "failed", error_message: "Could not find or create Pinterest board." })
+        .update({ status: "failed", error_message: message })
         .eq("id", jobId);
+
       return new Response(
-        JSON.stringify({ error: "Could not find or create board" }),
-        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        JSON.stringify({ error: message, pinterestEnvironment: pinterest.environment }),
+        { status: 502, headers: { ...corsHeaders, "Content-Type": "application/json" } },
       );
     }
 
-    // Build pin title and description
     const title = pinTitle || "Untitled Pin";
     const description = pinDescription || caption || "";
     const fullDescription = hashtags?.length
       ? `${description}\n\n${hashtags.map((t) => t.startsWith("#") ? t : `#${t}`).join(" ")}`
       : description;
 
-    // Create the pin
-    const result = await createPinterestPin(accessToken, boardId, title, fullDescription, imageUrl, link);
+    const result = await createPinterestPin(
+      pinterest.apiBaseUrl,
+      pinterest.accessToken,
+      boardId,
+      title,
+      fullDescription,
+      imageUrl,
+      link,
+    );
 
     if ("error" in result) {
       await supabase
         .from("publish_jobs")
         .update({ status: "failed", error_message: result.error })
         .eq("id", jobId);
+
       return new Response(
-        JSON.stringify({ error: result.error }),
-        { status: 502, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        JSON.stringify({
+          error: result.error,
+          pinterestEnvironment: pinterest.environment,
+        }),
+        { status: 502, headers: { ...corsHeaders, "Content-Type": "application/json" } },
       );
     }
 
-    // Success — record the result
     await supabase
       .from("publish_jobs")
       .update({
@@ -210,15 +352,20 @@ serve(async (req: Request) => {
       })
       .eq("id", jobId);
 
-    // Also update content_items stage to published
     await supabase
       .from("content_items")
       .update({ stage: "published", updated_at: new Date().toISOString() })
       .eq("id", contentId);
 
     return new Response(
-      JSON.stringify({ ok: true, pinId: result.id, pinLink: result.link, boardId }),
-      { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      JSON.stringify({
+        ok: true,
+        pinId: result.id,
+        pinLink: result.link,
+        boardId,
+        pinterestEnvironment: pinterest.environment,
+      }),
+      { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } },
     );
   } catch (err) {
     const authResponse = operatorErrorResponse(err, corsHeaders);
@@ -227,7 +374,7 @@ serve(async (req: Request) => {
     console.error("publish-pin error:", err);
     return new Response(
       JSON.stringify({ error: "Internal error" }),
-      { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } },
     );
   }
 });
