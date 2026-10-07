@@ -12,6 +12,8 @@ interface TokenResponse {
   expires_in?: number;
   token_type?: string;
   refresh_token?: string;
+  refresh_token_expires_in?: number;
+  refresh_token_expires_at?: number;
   error?: string;
   error_description?: string;
 }
@@ -146,6 +148,29 @@ async function exchangeCode(
     };
   }
 
+  if (config.provider === 'pinterest') {
+    const body = new URLSearchParams({
+      grant_type: 'authorization_code',
+      code,
+      redirect_uri: OAUTH_CALLBACK_URL,
+    });
+
+    const res = await fetch(config.tokenUrl, {
+      method: 'POST',
+      body,
+      headers: {
+        Authorization: `Basic ${btoa(`${clientId}:${clientSecret}`)}`,
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+    });
+
+    const data: TokenResponse = await res.json();
+    if (!res.ok) {
+      throw new Error(data.error_description || data.error || `Pinterest token exchange failed: ${res.status}`);
+    }
+    return data;
+  }
+
   if (config.provider === 'linkedin') {
     const body = new URLSearchParams({
       grant_type: 'authorization_code',
@@ -248,6 +273,11 @@ serve(async (req: Request) => {
     const expiresAt = tokenData.expires_in
       ? new Date(Date.now() + tokenData.expires_in * 1000).toISOString()
       : null;
+    const refreshTokenExpiresAt = tokenData.refresh_token_expires_at
+      ? new Date(tokenData.refresh_token_expires_at * 1000).toISOString()
+      : tokenData.refresh_token_expires_in
+      ? new Date(Date.now() + tokenData.refresh_token_expires_in * 1000).toISOString()
+      : null;
 
     const { error: credentialError } = await supabase
       .from('oauth_credentials')
@@ -256,6 +286,7 @@ serve(async (req: Request) => {
         access_token: tokenData.access_token,
         refresh_token: tokenData.refresh_token ?? null,
         expires_at: expiresAt,
+        refresh_token_expires_at: refreshTokenExpiresAt,
         external_id: externalId,
         updated_at: new Date().toISOString(),
       }, { onConflict: 'provider' });
