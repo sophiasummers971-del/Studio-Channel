@@ -102,3 +102,10 @@ create policy "operator_select_account_connections"
 -- OAuth secrets and anti-forgery state remain service-role only.
 revoke all on table public.oauth_credentials from anon, authenticated;
 revoke all on table public.oauth_states from anon, authenticated;
+
+
+-- Bind each OAuth authorization attempt to the operator who initiated it.
+alter table public.oauth_states
+  add column if not exists user_id uuid references auth.users(id) on delete cascade;
+
+create index if not exists idx_oauth_states_user_id on public.oauth_states(user_id);
