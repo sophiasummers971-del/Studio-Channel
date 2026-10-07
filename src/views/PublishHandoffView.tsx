@@ -161,7 +161,7 @@ export function PublishHandoffView() {
           <button
             onClick={handlePublishAll}
             disabled={publishing.size > 0}
-            className="px-5 py-2.5 bg-emerald-400/[0.045]0 text-white text-sm font-semibold rounded-lg hover:bg-emerald-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center gap-2 shadow-sm"
+            className="px-5 py-2.5 bg-emerald-500 text-white text-sm font-semibold rounded-lg hover:bg-emerald-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center gap-2 shadow-sm"
           >
             {publishing.size > 0 ? (
               <Loader2 size={16} className="animate-spin" />
