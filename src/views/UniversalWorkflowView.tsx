@@ -95,7 +95,7 @@ export function UniversalWorkflowView({ workflow, onNavigateToApproval }: Univer
             {currentStage && (
               <button
                 onClick={() => advanceStage(currentStage.stageId)}
-                className="flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-white bg-cyan-400/[0.04]0 rounded-lg hover:bg-sky-600 transition-colors shadow-sm"
+                className="flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-white bg-sky-500 rounded-lg hover:bg-sky-600 transition-colors shadow-sm"
               >
                 <PlayCircle size={15} />
                 Advance {WORKFLOW_STAGES.find((s) => s.id === currentStage.stageId)?.label}
