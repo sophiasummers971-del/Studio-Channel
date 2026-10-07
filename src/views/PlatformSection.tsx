@@ -48,7 +48,7 @@ export function PlatformSection({ platformId, onBack, onItemClick }: PlatformSec
     <div className="p-8 max-w-7xl mx-auto">
       <button
         onClick={onBack}
-        className="flex items-center gap-1.5 text-sm text-slate-500 hover:text-slate-800 transition-colors mb-5"
+        className="flex items-center gap-1.5 text-sm text-slate-500 hover:text-slate-200 transition-colors mb-5"
       >
         <ArrowLeft size={16} />
         Back to dashboard
@@ -65,7 +65,7 @@ export function PlatformSection({ platformId, onBack, onItemClick }: PlatformSec
             </span>
           </div>
           <div>
-            <h2 className="text-2xl font-bold text-slate-900">{platform.label}</h2>
+            <h2 className="text-2xl font-bold text-slate-100">{platform.label}</h2>
             <p className="text-sm text-slate-500">{platform.description}</p>
           </div>
         </div>
@@ -75,13 +75,13 @@ export function PlatformSection({ platformId, onBack, onItemClick }: PlatformSec
         </button>
       </div>
 
-      <div className="flex items-center gap-2 mb-6 border-b border-slate-200 pb-px">
+      <div className="flex items-center gap-2 mb-6 border-b border-[#1b2935] pb-px">
         <button
           onClick={() => setActiveFormat('all')}
           className={`px-4 py-2.5 text-sm font-medium transition-all relative ${
             activeFormat === 'all'
-              ? 'text-slate-900'
-              : 'text-slate-500 hover:text-slate-700'
+              ? 'text-slate-100'
+              : 'text-slate-500 hover:text-slate-300'
           }`}
         >
           All Content
@@ -103,7 +103,7 @@ export function PlatformSection({ platformId, onBack, onItemClick }: PlatformSec
               key={fmt.id}
               onClick={() => setActiveFormat(fmt.id)}
               className={`px-4 py-2.5 text-sm font-medium transition-all relative flex items-center gap-2 ${
-                isActive ? 'text-slate-900' : 'text-slate-500 hover:text-slate-700'
+                isActive ? 'text-slate-100' : 'text-slate-500 hover:text-slate-300'
               }`}
             >
               <Icon size={15} />
@@ -118,7 +118,7 @@ export function PlatformSection({ platformId, onBack, onItemClick }: PlatformSec
       </div>
 
       {activeFormat !== 'all' && (
-        <div className="mb-6 p-4 bg-sky-50 border border-sky-100 rounded-xl">
+        <div className="mb-6 p-4 bg-cyan-400/[0.04] border border-cyan-400/10 rounded-xl">
           <div className="flex items-start gap-3">
             <div className="w-9 h-9 rounded-lg bg-sky-100 flex items-center justify-center shrink-0">
               {(() => {
@@ -127,7 +127,7 @@ export function PlatformSection({ platformId, onBack, onItemClick }: PlatformSec
               })()}
             </div>
             <div>
-              <p className="text-sm font-medium text-slate-800">
+              <p className="text-sm font-medium text-slate-200">
                 {getFormat(activeFormat)?.label}
               </p>
               <p className="text-xs text-slate-500 mt-0.5">
@@ -140,10 +140,10 @@ export function PlatformSection({ platformId, onBack, onItemClick }: PlatformSec
 
       {filteredContent.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-20 text-center">
-          <div className="w-16 h-16 rounded-full bg-slate-100 flex items-center justify-center mb-4">
+          <div className="w-16 h-16 rounded-full bg-[#101820] flex items-center justify-center mb-4">
             <Plus size={28} className="text-slate-400" />
           </div>
-          <p className="text-sm font-medium text-slate-600 mb-1">No content yet</p>
+          <p className="text-sm font-medium text-slate-400 mb-1">No content yet</p>
           <p className="text-xs text-slate-400">
             Create your first {activeFormat !== 'all' ? getFormat(activeFormat)?.label.toLowerCase() : ''} content for {platform.label}
           </p>
