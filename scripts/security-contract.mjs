@@ -99,4 +99,33 @@ assert.match(functionConfig, /\[functions\."?publish-pin"?\][\s\S]*verify_jwt\s*
 assert.match(functionConfig, /\[functions\."?generate-content"?\][\s\S]*verify_jwt\s*=\s*true/,
   'generate-content must require JWT verification');
 
+const generateClient = read('src/lib/generateContent.ts');
+const publishClient = read('src/hooks/usePublishPipeline.ts');
+
+assert.doesNotMatch(generateClient, /VITE_SUPABASE_ANON_KEY/,
+  'AI generation must not authenticate privileged functions with the public anon key');
+assert.match(generateClient, /functions\.invoke\(['"]generate-content['"]/,
+  'AI generation must use the authenticated Supabase function client');
+
+assert.doesNotMatch(publishClient, /VITE_SUPABASE_ANON_KEY/,
+  'publishing must not authenticate privileged functions with the public anon key');
+assert.match(publishClient, /functions\.invoke\(['"]publish-pin['"]/,
+  'publishing must use the authenticated Supabase function client');
+
+assert.match(oauthConfig, /https:\/\/www\.instagram\.com\/oauth\/authorize/,
+  'Instagram must use current Instagram Business Login authorization endpoint');
+assert.match(oauthConfig, /instagram_business_basic/,
+  'Instagram must request current professional-account basic scope');
+assert.match(oauthConfig, /instagram_business_content_publish/,
+  'Instagram must request current content publishing scope');
+assert.doesNotMatch(oauthConfig, /user_profile,user_media/,
+  'legacy Instagram Basic Display-style scopes must be removed');
+
+assert.match(oauthConfig, /openid profile email w_member_social/,
+  'LinkedIn must use current OIDC identity scopes plus member publishing permission');
+assert.match(authCallback, /api\.linkedin\.com\/v2\/userinfo/,
+  'LinkedIn profile lookup must use the current OIDC userinfo endpoint');
+assert.match(authCallback, /ig_exchange_token/,
+  'Instagram short-lived token must be upgraded server-side before storage');
+
 console.log('security contract: PASS');
