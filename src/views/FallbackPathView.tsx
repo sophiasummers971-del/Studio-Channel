@@ -95,7 +95,7 @@ export function FallbackPathView() {
     <div className="p-8 max-w-6xl mx-auto">
       {/* Header */}
       <div className="mb-6">
-        <h2 className="text-2xl font-bold text-slate-900 mb-1">Fallback Path</h2>
+        <h2 className="text-2xl font-bold text-slate-100 mb-1">Fallback Path</h2>
         <p className="text-sm text-slate-500">
           The safety line that keeps content flowing when a channel-specific flow breaks. The
           universal baseline takes over, produces minimum viable content, and queues it for manual
@@ -159,7 +159,7 @@ export function FallbackPathView() {
                     ? 'bg-amber-50 border-amber-300 ring-2 ring-amber-100'
                     : isComplete
                     ? 'bg-emerald-50/50 border-emerald-100'
-                    : 'bg-white border-slate-200'
+                    : 'bg-[#0b1118] border-[#1b2935]'
                 }`}
               >
                 <div
@@ -226,7 +226,7 @@ export function FallbackPathView() {
           {MVP_OUTPUTS.map((mvp) => (
             <div
               key={mvp.id}
-              className="flex items-start gap-3 bg-white border border-slate-200 rounded-xl p-4"
+              className="flex items-start gap-3 bg-[#0b1118] border border-[#1b2935] rounded-xl p-4"
             >
               <div className="w-9 h-9 rounded-lg bg-emerald-50 flex items-center justify-center shrink-0">
                 <CheckCircle2 size={17} className="text-emerald-600" />
@@ -255,7 +255,7 @@ export function FallbackPathView() {
             <ShieldCheck size={16} className="text-slate-400" />
             <h3 className="text-sm font-semibold text-slate-700">Recovery Checks</h3>
           </div>
-          <div className="bg-white border border-slate-200 rounded-xl p-4 space-y-2">
+          <div className="bg-[#0b1118] border border-[#1b2935] rounded-xl p-4 space-y-2">
             {recoveryChecks.map((check) => (
               <button
                 key={check.id}
@@ -263,12 +263,12 @@ export function FallbackPathView() {
                 className={`w-full flex items-start gap-3 px-3 py-2.5 rounded-lg text-left transition-all ${
                   check.checked
                     ? 'bg-emerald-50/50 border border-emerald-100'
-                    : 'bg-slate-50 border border-slate-100 hover:bg-slate-100'
+                    : 'bg-[#070b10] border border-[#14202a] hover:bg-[#101820]'
                 }`}
               >
                 <div
                   className={`w-5 h-5 rounded-md flex items-center justify-center shrink-0 mt-0.5 transition-all ${
-                    check.checked ? 'bg-emerald-500' : 'bg-white border border-slate-300'
+                    check.checked ? 'bg-emerald-500' : 'bg-[#0b1118] border border-slate-300'
                   }`}
                 >
                   {check.checked ? (
@@ -306,7 +306,7 @@ export function FallbackPathView() {
           </span>
         </div>
 
-        <div className="bg-white border border-slate-200 rounded-xl p-4 space-y-2">
+        <div className="bg-[#0b1118] border border-[#1b2935] rounded-xl p-4 space-y-2">
           {preDeployChecks.map((check) => {
             const checked = check.checked;
             return (
@@ -316,12 +316,12 @@ export function FallbackPathView() {
                 className={`w-full flex items-start gap-3 px-3 py-2.5 rounded-lg text-left transition-all ${
                   checked
                     ? 'bg-emerald-50/50 border border-emerald-100'
-                    : 'bg-slate-50 border border-slate-100 hover:bg-slate-100'
+                    : 'bg-[#070b10] border border-[#14202a] hover:bg-[#101820]'
                 }`}
               >
                 <div
                   className={`w-5 h-5 rounded-md flex items-center justify-center shrink-0 mt-0.5 transition-all ${
-                    checked ? 'bg-emerald-500' : 'bg-white border border-slate-300'
+                    checked ? 'bg-emerald-500' : 'bg-[#0b1118] border border-slate-300'
                   }`}
                 >
                   {checked ? (
