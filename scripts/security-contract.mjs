@@ -5,7 +5,6 @@ const read = (path) => readFileSync(path, 'utf8');
 
 const hook = read('src/hooks/useAccountConnections.ts');
 const connections = read('src/views/ConnectionsView.tsx');
-const passwordGate = read('src/components/PasswordGate.tsx');
 const authStart = read('supabase/functions/auth_start/index.ts');
 const authCallback = read('supabase/functions/auth_callback/index.ts');
 const oauthConfig = read('supabase/functions/_shared/config.ts');
@@ -23,9 +22,6 @@ assert.doesNotMatch(hook, /connectManual/,
 
 assert.doesNotMatch(connections, /Access token \(optional\)|Paste token|Manual entry/,
   'connections UI must not accept manual OAuth tokens');
-
-assert.doesNotMatch(passwordGate, /channel-studio-2026/,
-  'client bundle must not contain a fallback application password');
 
 assert.match(authStart, /oauth_states/,
   'auth_start must persist server-side OAuth state');
@@ -65,6 +61,17 @@ assert.match(main, /AuthGate/,
   'main entrypoint must use AuthGate');
 assert.doesNotMatch(main, /PasswordGate/,
   'client-side password gate must not be the production trust boundary');
+assert.ok(
+  !existsSync('src/components/PasswordGate.tsx'),
+  'obsolete client password gate must be removed'
+);
+
+const deployWorkflow = read('.github/workflows/deploy-cloudflare.yml');
+const securityWorkflow = read('.github/workflows/security-foundation-ci.yml');
+assert.doesNotMatch(deployWorkflow, /VITE_APP_PASSWORD/,
+  'Cloudflare deployment must not inject an obsolete client password');
+assert.doesNotMatch(securityWorkflow, /VITE_APP_PASSWORD/,
+  'security CI must not inject an obsolete client password');
 
 assert.ok(
   existsSync('supabase/functions/_shared/requireOperator.ts'),

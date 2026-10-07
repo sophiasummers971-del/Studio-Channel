@@ -53,7 +53,7 @@ export function TestPlanView({ testPlan, onNavigateToGate }: TestPlanViewProps) 
   return (
     <div className="p-8 max-w-6xl mx-auto">
       <div className="mb-6">
-        <h2 className="text-2xl font-bold text-slate-900 mb-1">Test Plan</h2>
+        <h2 className="text-2xl font-bold text-slate-100 mb-1">Test Plan</h2>
         <p className="text-sm text-slate-500">
           Validation scenarios for the universal baseline workflow. Run all tests to confirm the
           workflow is reliable, repeatable, and ready for deployment.
@@ -62,33 +62,33 @@ export function TestPlanView({ testPlan, onNavigateToGate }: TestPlanViewProps) 
 
       {/* Summary Bar */}
       <div className="grid grid-cols-4 gap-3 mb-6">
-        <div className="bg-white border border-slate-200 rounded-xl p-4">
+        <div className="bg-[#0b1118] border border-[#1b2935] rounded-xl p-4">
           <div className="flex items-center gap-2 mb-1">
             <CheckCircle2 size={16} className="text-emerald-500" />
             <span className="text-xs text-slate-500">Passed</span>
           </div>
-          <p className="text-2xl font-bold text-slate-900">{passCount}</p>
+          <p className="text-2xl font-bold text-slate-100">{passCount}</p>
         </div>
-        <div className="bg-white border border-slate-200 rounded-xl p-4">
+        <div className="bg-[#0b1118] border border-[#1b2935] rounded-xl p-4">
           <div className="flex items-center gap-2 mb-1">
             <AlertTriangle size={16} className="text-amber-500" />
             <span className="text-xs text-slate-500">Warnings</span>
           </div>
-          <p className="text-2xl font-bold text-slate-900">{warningCount}</p>
+          <p className="text-2xl font-bold text-slate-100">{warningCount}</p>
         </div>
-        <div className="bg-white border border-slate-200 rounded-xl p-4">
+        <div className="bg-[#0b1118] border border-[#1b2935] rounded-xl p-4">
           <div className="flex items-center gap-2 mb-1">
             <XCircle size={16} className="text-rose-500" />
             <span className="text-xs text-slate-500">Failed</span>
           </div>
-          <p className="text-2xl font-bold text-slate-900">{failCount}</p>
+          <p className="text-2xl font-bold text-slate-100">{failCount}</p>
         </div>
-        <div className="bg-white border border-slate-200 rounded-xl p-4">
+        <div className="bg-[#0b1118] border border-[#1b2935] rounded-xl p-4">
           <div className="flex items-center gap-2 mb-1">
             <Circle size={16} className="text-slate-400" />
             <span className="text-xs text-slate-500">Not Run</span>
           </div>
-          <p className="text-2xl font-bold text-slate-900">{notRunCount}</p>
+          <p className="text-2xl font-bold text-slate-100">{notRunCount}</p>
         </div>
       </div>
 
@@ -109,7 +109,7 @@ export function TestPlanView({ testPlan, onNavigateToGate }: TestPlanViewProps) 
         <button
           onClick={resetTests}
           disabled={running}
-          className="flex items-center gap-2 px-4 py-2.5 text-sm text-slate-600 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors disabled:opacity-50"
+          className="flex items-center gap-2 px-4 py-2.5 text-sm text-slate-400 bg-[#0b1118] border border-[#1b2935] rounded-lg hover:bg-[#070b10] transition-colors disabled:opacity-50"
         >
           <RotateCcw size={15} />
           Reset
@@ -117,7 +117,7 @@ export function TestPlanView({ testPlan, onNavigateToGate }: TestPlanViewProps) 
         <div className="ml-auto">
           <button
             onClick={onNavigateToGate}
-            className="flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-slate-700 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors"
+            className="flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-slate-300 bg-[#0b1118] border border-[#1b2935] rounded-lg hover:bg-[#070b10] transition-colors"
           >
             <Flag size={15} className="text-slate-500" />
             Go to Deployment Gate
@@ -138,22 +138,22 @@ export function TestPlanView({ testPlan, onNavigateToGate }: TestPlanViewProps) 
           return (
             <div
               key={scenario.id}
-              className={`bg-white border rounded-xl overflow-hidden transition-all ${
+              className={`bg-[#0b1118] border rounded-xl overflow-hidden transition-all ${
                 status === 'running'
                   ? 'border-amber-300 shadow-md'
                   : status === 'failed'
                   ? 'border-rose-200'
                   : status === 'passed'
-                  ? 'border-slate-200'
+                  ? 'border-[#1b2935]'
                   : status === 'warning'
-                  ? 'border-amber-200'
-                  : 'border-slate-200'
+                  ? 'border-amber-400/15'
+                  : 'border-[#1b2935]'
               }`}
             >
               {/* Header Row */}
               <button
                 onClick={() => setExpandedId(isExpanded ? null : scenario.id)}
-                className="w-full flex items-center gap-4 px-5 py-4 text-left hover:bg-slate-50/50 transition-colors"
+                className="w-full flex items-center gap-4 px-5 py-4 text-left hover:bg-[#070b10]/50 transition-colors"
               >
                 <div
                   className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
@@ -164,7 +164,7 @@ export function TestPlanView({ testPlan, onNavigateToGate }: TestPlanViewProps) 
 
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-0.5">
-                    <h3 className="text-sm font-semibold text-slate-800">{scenario.name}</h3>
+                    <h3 className="text-sm font-semibold text-slate-200">{scenario.name}</h3>
                     <span
                       className="text-[10px] font-medium px-2 py-0.5 rounded-full"
                       style={{ backgroundColor: `${CATEGORY_COLORS[scenario.category]}15`, color: CATEGORY_COLORS[scenario.category] }}
@@ -197,7 +197,7 @@ export function TestPlanView({ testPlan, onNavigateToGate }: TestPlanViewProps) 
                         e.stopPropagation();
                         runSingleTest(scenario.id);
                       }}
-                      className="flex items-center gap-1 px-2.5 py-1 text-xs font-medium text-sky-600 bg-sky-50 rounded-lg hover:bg-sky-100 transition-colors cursor-pointer"
+                      className="flex items-center gap-1 px-2.5 py-1 text-xs font-medium text-sky-600 bg-cyan-400/[0.04] rounded-lg hover:bg-sky-100 transition-colors cursor-pointer"
                     >
                       <Play size={12} />
                       Run
@@ -213,7 +213,7 @@ export function TestPlanView({ testPlan, onNavigateToGate }: TestPlanViewProps) 
 
               {/* Expanded Detail */}
               {isExpanded && (
-                <div className="px-5 pb-5 pt-1 border-t border-slate-100">
+                <div className="px-5 pb-5 pt-1 border-t border-[#14202a]">
                   <div className="grid grid-cols-2 gap-6 mt-4">
                     {/* Steps */}
                     <div>
@@ -224,10 +224,10 @@ export function TestPlanView({ testPlan, onNavigateToGate }: TestPlanViewProps) 
                       <div className="space-y-1.5">
                         {scenario.steps.map((step, i) => (
                           <div key={i} className="flex items-start gap-2">
-                            <span className="w-5 h-5 rounded-md bg-slate-100 flex items-center justify-center text-[10px] font-bold text-slate-500 shrink-0 mt-0.5">
+                            <span className="w-5 h-5 rounded-md bg-[#101820] flex items-center justify-center text-[10px] font-bold text-slate-500 shrink-0 mt-0.5">
                               {i + 1}
                             </span>
-                            <span className="text-xs text-slate-600 leading-relaxed">{step}</span>
+                            <span className="text-xs text-slate-400 leading-relaxed">{step}</span>
                           </div>
                         ))}
                       </div>
@@ -244,7 +244,7 @@ export function TestPlanView({ testPlan, onNavigateToGate }: TestPlanViewProps) 
                           {scenario.passCriteria.map((c, i) => (
                             <div key={i} className="flex items-start gap-2">
                               <CheckCircle2 size={12} className="text-emerald-500 shrink-0 mt-0.5" />
-                              <span className="text-xs text-slate-600 leading-relaxed">{c}</span>
+                              <span className="text-xs text-slate-400 leading-relaxed">{c}</span>
                             </div>
                           ))}
                         </div>
@@ -258,7 +258,7 @@ export function TestPlanView({ testPlan, onNavigateToGate }: TestPlanViewProps) 
                           {scenario.failCriteria.map((c, i) => (
                             <div key={i} className="flex items-start gap-2">
                               <XCircle size={12} className="text-rose-500 shrink-0 mt-0.5" />
-                              <span className="text-xs text-slate-600 leading-relaxed">{c}</span>
+                              <span className="text-xs text-slate-400 leading-relaxed">{c}</span>
                             </div>
                           ))}
                         </div>
@@ -267,7 +267,7 @@ export function TestPlanView({ testPlan, onNavigateToGate }: TestPlanViewProps) 
                   </div>
 
                   {/* Related Stages */}
-                  <div className="mt-4 pt-3 border-t border-slate-100">
+                  <div className="mt-4 pt-3 border-t border-[#14202a]">
                     <p className="text-[10px] font-semibold uppercase tracking-wide text-slate-400 mb-2">Related Workflow Stages</p>
                     <div className="flex items-center gap-2 flex-wrap">
                       {scenario.relatedStages.map((stageId) => {
@@ -275,7 +275,7 @@ export function TestPlanView({ testPlan, onNavigateToGate }: TestPlanViewProps) 
                         return stage ? (
                           <span
                             key={stageId}
-                            className="text-[10px] font-medium px-2 py-1 rounded-md bg-slate-100 text-slate-600"
+                            className="text-[10px] font-medium px-2 py-1 rounded-md bg-[#101820] text-slate-400"
                           >
                             {stage.label}
                           </span>
@@ -299,7 +299,7 @@ export function TestPlanView({ testPlan, onNavigateToGate }: TestPlanViewProps) 
                         )}
                       </div>
                       {result.notes && (
-                        <p className="text-xs text-slate-600 leading-relaxed">{result.notes}</p>
+                        <p className="text-xs text-slate-400 leading-relaxed">{result.notes}</p>
                       )}
                     </div>
                   )}
@@ -313,7 +313,7 @@ export function TestPlanView({ testPlan, onNavigateToGate }: TestPlanViewProps) 
                       </p>
                       <div className="space-y-1.5">
                         {scenarioIssues.map((issue) => (
-                          <div key={issue.id} className="flex items-start gap-2 p-2.5 bg-slate-50 rounded-lg">
+                          <div key={issue.id} className="flex items-start gap-2 p-2.5 bg-[#070b10] rounded-lg">
                             <span
                               className="text-[10px] font-bold px-1.5 py-0.5 rounded-full shrink-0 mt-0.5"
                               style={{
@@ -328,7 +328,7 @@ export function TestPlanView({ testPlan, onNavigateToGate }: TestPlanViewProps) 
                               {issue.severity}
                             </span>
                             <div className="flex-1">
-                              <p className="text-xs text-slate-600 leading-relaxed">{issue.description}</p>
+                              <p className="text-xs text-slate-400 leading-relaxed">{issue.description}</p>
                               {issue.mustFixBeforeDeploy && (
                                 <p className="text-[10px] text-rose-500 font-medium mt-1">Must fix before deploy</p>
                               )}

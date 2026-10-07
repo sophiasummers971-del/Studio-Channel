@@ -45,19 +45,19 @@ export function ConnectionsView() {
     <div className="max-w-7xl mx-auto px-6 py-8">
       <div className="flex items-start justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">Account Connections</h1>
+          <h1 className="text-2xl font-bold text-slate-100">Account Connections</h1>
           <p className="text-sm text-slate-500 mt-1">
             OAuth credentials stay in server-only storage. This screen receives connection metadata only.
           </p>
         </div>
-        <div className="px-3 py-1.5 rounded-full text-xs font-semibold bg-slate-100 text-slate-600">
+        <div className="px-3 py-1.5 rounded-full text-xs font-semibold bg-[#101820] text-slate-400">
           {connectedCount} / {CONNECTORS.length} connected
         </div>
       </div>
 
-      <div className="flex items-start gap-3 bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 mb-6">
+      <div className="flex items-start gap-3 bg-amber-400/[0.05] border border-amber-400/15 rounded-xl px-4 py-3 mb-6">
         <AlertTriangle size={18} className="text-amber-500 mt-0.5 shrink-0" />
-        <p className="text-xs text-amber-800 leading-relaxed">
+        <p className="text-xs text-amber-200/80 leading-relaxed">
           Direct token entry has been disabled. New connections must complete the provider OAuth flow so credentials never pass through the browser UI.
           {dbReady ? ' Connection status is synced from Supabase.' : ' Backend connection status is currently unavailable.'}
         </p>
@@ -72,8 +72,8 @@ export function ConnectionsView() {
           return (
             <div
               key={connector.id}
-              className={`bg-white border rounded-xl p-5 transition-all flex flex-col ${
-                connected ? 'border-emerald-200 shadow-sm' : 'border-slate-200'
+              className={`bg-[#0b1118] border rounded-xl p-5 transition-all flex flex-col ${
+                connected ? 'border-emerald-400/20 shadow-sm' : 'border-[#1b2935]'
               }`}
             >
               <div className="flex items-center gap-3 mb-3">
@@ -84,7 +84,7 @@ export function ConnectionsView() {
                   <Icon size={20} style={{ color: connector.color }} />
                 </span>
                 <div className="min-w-0 flex-1">
-                  <h3 className="text-sm font-semibold text-slate-900">{connector.label}</h3>
+                  <h3 className="text-sm font-semibold text-slate-100">{connector.label}</h3>
                   <p className="text-[11px] text-slate-500 truncate">{connector.powers}</p>
                 </div>
                 {connected ? (
@@ -96,10 +96,10 @@ export function ConnectionsView() {
 
               {connected ? (
                 <div className="space-y-3 mt-1 flex-1">
-                  <div className="rounded-lg bg-emerald-50 border border-emerald-100 px-3 py-2">
+                  <div className="rounded-lg bg-emerald-400/[0.045] border border-emerald-400/10 px-3 py-2">
                     <p className="text-[11px] text-slate-500">Connected account</p>
-                    <p className="text-sm font-semibold text-slate-800 break-all">{conn?.accountName || 'Connected'}</p>
-                    <p className="text-[11px] text-emerald-600 mt-1">
+                    <p className="text-sm font-semibold text-slate-200 break-all">{conn?.accountName || 'Connected'}</p>
+                    <p className="text-[11px] text-emerald-400 mt-1">
                       {conn?.verified ? '✓ Provider authorization verified' : 'Connection recorded'}
                     </p>
                     {conn?.expiresAt && (
@@ -110,7 +110,7 @@ export function ConnectionsView() {
                   </div>
                   <button
                     onClick={() => startOAuth(connector.id)}
-                    className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-xs font-semibold bg-slate-100 text-slate-700 hover:bg-slate-200 transition-all"
+                    className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-xs font-semibold bg-[#101820] text-slate-300 hover:bg-slate-200 transition-all"
                   >
                     <RefreshCw size={14} />
                     Reauthorize securely
@@ -134,9 +134,9 @@ export function ConnectionsView() {
         })}
       </div>
 
-      <div className="mt-6 flex items-start gap-3 bg-sky-50 border border-sky-100 rounded-xl px-4 py-3">
+      <div className="mt-6 flex items-start gap-3 bg-cyan-400/[0.04] border border-cyan-400/10 rounded-xl px-4 py-3">
         <Info size={18} className="text-sky-500 mt-0.5 shrink-0" />
-        <p className="text-xs text-sky-700 leading-relaxed">
+        <p className="text-xs text-cyan-200/75 leading-relaxed">
           {!loaded
             ? 'Loading connection status…'
             : 'Studio only displays provider status and profile metadata here. OAuth credentials remain server-side.'}

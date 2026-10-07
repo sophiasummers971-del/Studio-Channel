@@ -38,7 +38,7 @@ export function DashboardHome({ onPlatformSelect, onNavigate }: DashboardHomePro
       <div className="flex flex-col gap-2 mb-8">
         <div className="flex items-center gap-2">
           <LayoutDashboard size={19} className="text-sky-500" />
-          <h2 className="text-2xl font-bold text-slate-900">Home</h2>
+          <h2 className="text-2xl font-bold text-slate-100">Home</h2>
         </div>
         <p className="text-sm text-slate-500">
           One view of what needs attention now. Detailed engineering controls live under System.
@@ -47,12 +47,12 @@ export function DashboardHome({ onPlatformSelect, onNavigate }: DashboardHomePro
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4 mb-8">
         {stats.map(({ label, value, icon: Icon }) => (
-          <div key={label} className="bg-white border border-slate-200 rounded-xl p-5">
+          <div key={label} className="bg-[#0b1118] border border-[#1b2935] rounded-xl p-5">
             <div className="flex items-center justify-between">
               <p className="text-xs font-medium text-slate-500">{label}</p>
               <Icon size={17} className="text-slate-400" />
             </div>
-            <p className="mt-3 text-2xl font-bold text-slate-900">{value}</p>
+            <p className="mt-3 text-2xl font-bold text-slate-100">{value}</p>
           </div>
         ))}
       </div>
@@ -69,32 +69,32 @@ export function DashboardHome({ onPlatformSelect, onNavigate }: DashboardHomePro
 
         <button
           onClick={() => onNavigate('approval')}
-          className="text-left bg-white border border-slate-200 rounded-xl p-5 hover:border-slate-300 hover:shadow-sm transition-all"
+          className="text-left bg-[#0b1118] border border-[#1b2935] rounded-xl p-5 hover:border-slate-300 hover:shadow-sm transition-all"
         >
           <CheckCircle2 size={20} className="text-emerald-500 mb-4" />
-          <h3 className="font-semibold text-slate-900">Review approvals</h3>
+          <h3 className="font-semibold text-slate-100">Review approvals</h3>
           <p className="text-xs text-slate-500 mt-1">{pendingApproval} item{pendingApproval === 1 ? '' : 's'} currently waiting for review.</p>
         </button>
 
         <button
           onClick={() => onNavigate('publish-handoff')}
-          className="text-left bg-white border border-slate-200 rounded-xl p-5 hover:border-slate-300 hover:shadow-sm transition-all"
+          className="text-left bg-[#0b1118] border border-[#1b2935] rounded-xl p-5 hover:border-slate-300 hover:shadow-sm transition-all"
         >
           <Rocket size={20} className="text-violet-500 mb-4" />
-          <h3 className="font-semibold text-slate-900">Publish queue</h3>
+          <h3 className="font-semibold text-slate-100">Publish queue</h3>
           <p className="text-xs text-slate-500 mt-1">{readyToPublish} item{readyToPublish === 1 ? '' : 's'} ready for publishing.</p>
         </button>
       </div>
 
-      <div className="bg-white border border-slate-200 rounded-xl overflow-hidden mb-8">
-        <div className="px-5 py-4 border-b border-slate-100 flex items-center justify-between">
+      <div className="bg-[#0b1118] border border-[#1b2935] rounded-xl overflow-hidden mb-8">
+        <div className="px-5 py-4 border-b border-[#14202a] flex items-center justify-between">
           <div>
-            <h3 className="font-semibold text-slate-900">Accounts</h3>
+            <h3 className="font-semibold text-slate-100">Accounts</h3>
             <p className="text-xs text-slate-500 mt-1">Provider status only. Credentials remain server-side.</p>
           </div>
           <button
             onClick={() => onNavigate('connections')}
-            className="text-xs font-semibold text-sky-600 hover:text-sky-700"
+            className="text-xs font-semibold text-sky-600 hover:text-cyan-200/75"
           >
             Manage accounts
           </button>
@@ -108,7 +108,7 @@ export function DashboardHome({ onPlatformSelect, onNavigate }: DashboardHomePro
               <button
                 key={platform.id}
                 onClick={() => onPlatformSelect(platform.id)}
-                className="w-full flex items-center gap-4 px-5 py-3.5 text-left hover:bg-slate-50 transition-colors"
+                className="w-full flex items-center gap-4 px-5 py-3.5 text-left hover:bg-[#070b10] transition-colors"
               >
                 <span
                   className="w-9 h-9 rounded-lg flex items-center justify-center text-xs font-bold"
@@ -117,7 +117,7 @@ export function DashboardHome({ onPlatformSelect, onNavigate }: DashboardHomePro
                   {platform.label[0]}
                 </span>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-slate-900">{platform.label}</p>
+                  <p className="text-sm font-medium text-slate-100">{platform.label}</p>
                   <p className="text-xs text-slate-500 truncate">
                     {connected ? connection.accountName || 'Connected' : 'Not connected'}
                   </p>
@@ -126,7 +126,7 @@ export function DashboardHome({ onPlatformSelect, onNavigate }: DashboardHomePro
                   {connected ? (
                     <>
                       <CheckCircle2 size={15} className="text-emerald-500" />
-                      <span className="text-emerald-600">Connected</span>
+                      <span className="text-emerald-400">Connected</span>
                     </>
                   ) : (
                     <>
@@ -142,17 +142,17 @@ export function DashboardHome({ onPlatformSelect, onNavigate }: DashboardHomePro
         </div>
       </div>
 
-      <div className="bg-white border border-slate-200 rounded-xl p-5">
+      <div className="bg-[#0b1118] border border-[#1b2935] rounded-xl p-5">
         <div className="flex items-center justify-between mb-5">
           <div>
-            <h3 className="font-semibold text-slate-900">Content flow</h3>
+            <h3 className="font-semibold text-slate-100">Content flow</h3>
             <p className="text-xs text-slate-500 mt-1">
               {dbLive ? 'Live Supabase data' : 'No live content rows loaded yet'}
             </p>
           </div>
           <button
             onClick={() => onNavigate('pipeline')}
-            className="text-xs font-semibold text-sky-600 hover:text-sky-700"
+            className="text-xs font-semibold text-sky-600 hover:text-cyan-200/75"
           >
             Open pipeline
           </button>
@@ -170,7 +170,7 @@ export function DashboardHome({ onPlatformSelect, onNavigate }: DashboardHomePro
                   >
                     {contentLoading ? '…' : count}
                   </div>
-                  <p className="text-xs font-medium text-slate-600 truncate">{stage.label}</p>
+                  <p className="text-xs font-medium text-slate-400 truncate">{stage.label}</p>
                 </div>
                 {index < CONTENT_STAGES.length - 1 && (
                   <div className="h-0.5 flex-1 bg-slate-200 -mt-6" />

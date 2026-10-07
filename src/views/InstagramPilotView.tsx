@@ -67,7 +67,7 @@ export function InstagramPilotView() {
             <Instagram size={22} style={{ color: instagramPlatform.color }} />
           </div>
           <div>
-            <h2 className="text-2xl font-bold text-slate-900">Instagram Pilot Configuration</h2>
+            <h2 className="text-2xl font-bold text-slate-100">Instagram Pilot Configuration</h2>
             <p className="text-sm text-slate-500">
               The first real channel test of the baseline system. Instagram runs on top of the
               validated universal workflow with only the minimum channel-specific adjustments.
@@ -80,10 +80,10 @@ export function InstagramPilotView() {
       <div
         className={`rounded-xl border p-5 mb-6 transition-all ${
           pilotComplete
-            ? 'bg-emerald-50 border-emerald-300'
+            ? 'bg-emerald-400/[0.045] border-emerald-300'
             : allPrerequisitesMet
-            ? 'bg-amber-50 border-amber-200'
-            : 'bg-slate-50 border-slate-200'
+            ? 'bg-amber-400/[0.05] border-amber-400/15'
+            : 'bg-[#070b10] border-[#1b2935]'
         }`}
       >
         <div className="flex items-center gap-4">
@@ -93,7 +93,7 @@ export function InstagramPilotView() {
             }`}
           >
             {pilotComplete ? (
-              <ShieldCheck size={24} className="text-emerald-600" />
+              <ShieldCheck size={24} className="text-emerald-400" />
             ) : allPrerequisitesMet ? (
               <Rocket size={24} className="text-amber-600" />
             ) : (
@@ -103,7 +103,7 @@ export function InstagramPilotView() {
           <div className="flex-1">
             <h3
               className={`text-sm font-semibold ${
-                pilotComplete ? 'text-emerald-800' : allPrerequisitesMet ? 'text-amber-800' : 'text-slate-700'}
+                pilotComplete ? 'text-emerald-800' : allPrerequisitesMet ? 'text-amber-200/80' : 'text-slate-300'}
               }`}
             >
               {pilotComplete
@@ -114,7 +114,7 @@ export function InstagramPilotView() {
             </h3>
             <p
               className={`text-xs mt-0.5 ${
-                pilotComplete ? 'text-emerald-600' : allPrerequisitesMet ? 'text-amber-600' : 'text-slate-500'
+                pilotComplete ? 'text-emerald-400' : allPrerequisitesMet ? 'text-amber-600' : 'text-slate-500'
               }`}
             >
               {pilotComplete
@@ -134,31 +134,31 @@ export function InstagramPilotView() {
                 onClick={() => allPrerequisitesMet && toggleBaselineElement(el.id)}
                 disabled={!allPrerequisitesMet}
                 className={`flex items-start gap-3 px-4 py-3 rounded-xl border text-left transition-all ${
-                  !allPrerequisitesMet ? 'cursor-not-allowed' : 'hover:bg-slate-50'
+                  !allPrerequisitesMet ? 'cursor-not-allowed' : 'hover:bg-[#070b10]'
                 } ${
                   reused
-                    ? 'bg-emerald-50/30 border-emerald-100'
-                    : 'bg-white border-slate-200'
+                    ? 'bg-emerald-400/[0.045]/30 border-emerald-400/10'
+                    : 'bg-[#0b1118] border-[#1b2935]'
                 }`}
               >
-                <div className="w-9 h-9 rounded-lg bg-slate-100 flex items-center justify-center shrink-0">
+                <div className="w-9 h-9 rounded-lg bg-[#101820] flex items-center justify-center shrink-0">
                   <StageIcon size={16} className="text-slate-500" />
                 </div>
                 <div className="flex-1">
                   <div className="flex items-center gap-2">
-                    <h4 className="text-sm font-semibold text-slate-800">{el.label}</h4>
+                    <h4 className="text-sm font-semibold text-slate-200">{el.label}</h4>
                     {stage && (
-                      <span className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-slate-100 text-slate-500">
+                      <span className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-[#101820] text-slate-500">
                         {stage.cadence}
                       </span>
                     )}
                     {reused ? (
-                      <span className="flex items-center gap-1 text-[10px] font-medium px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-600">
+                      <span className="flex items-center gap-1 text-[10px] font-medium px-2 py-0.5 rounded-full bg-emerald-400/[0.045] text-emerald-400">
                         <CheckCircle2 size={10} />
                         Reused
                       </span>
                     ) : (
-                      <span className="flex items-center gap-1 text-[10px] font-medium px-2 py-0.5 rounded-full bg-amber-50 text-amber-600">
+                      <span className="flex items-center gap-1 text-[10px] font-medium px-2 py-0.5 rounded-full bg-amber-400/[0.05] text-amber-600">
                         <AlertTriangle size={10} />
                         Modified
                       </span>
@@ -177,7 +177,7 @@ export function InstagramPilotView() {
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
             <SlidersHorizontal size={16} className="text-slate-400" />
-            <h3 className="text-sm font-semibold text-slate-700">Instagram-Specific Adjustments</h3>
+            <h3 className="text-sm font-semibold text-slate-300">Instagram-Specific Adjustments</h3>
             <span className="text-xs text-slate-400">
               ({enabledAdjustmentCount}/{adjustments.length} enabled)
             </span>
@@ -195,8 +195,8 @@ export function InstagramPilotView() {
                 onClick={() => allPrerequisitesMet && toggleAdjustment(adj.id)}
                 className={`w-full text-left flex items-start gap-3 px-4 py-3 rounded-xl border transition-all ${
                   enabled
-                    ? 'bg-sky-50/50 border-sky-200'
-                    : 'bg-white border-slate-200'
+                    ? 'bg-cyan-400/[0.04]/50 border-sky-200'
+                    : 'bg-[#0b1118] border-[#1b2935]'
                 } ${!allPrerequisitesMet ? 'opacity-60' : ''}`}
               >
                 <div
@@ -212,13 +212,13 @@ export function InstagramPilotView() {
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-1">
-                    <p className="text-sm font-medium text-slate-700">{adj.label}</p>
+                    <p className="text-sm font-medium text-slate-300">{adj.label}</p>
                     {enabled ? (
-                      <span className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-sky-50 text-sky-600">
+                      <span className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-cyan-400/[0.04] text-sky-600">
                         Enabled
                       </span>
                     ) : (
-                      <span className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-slate-100 text-slate-400">
+                      <span className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-[#101820] text-slate-400">
                         Off
                       </span>
                     )}
@@ -241,7 +241,7 @@ export function InstagramPilotView() {
       <div className="mb-8">
         <div className="flex items-center gap-2 mb-4">
           <Lightbulb size={16} className="text-slate-400" />
-          <h3 className="text-sm font-semibold text-slate-700">Reusable Lessons for the Next Channel</h3>
+          <h3 className="text-sm font-semibold text-slate-300">Reusable Lessons for the Next Channel</h3>
         </div>
 
         {/* Reusable across channels */}
@@ -253,13 +253,13 @@ export function InstagramPilotView() {
             {reusableLessons.map((lesson) => (
               <div
                 key={lesson.id}
-                className="flex items-start gap-3 px-4 py-3 bg-white border border-slate-200 rounded-xl"
+                className="flex items-start gap-3 px-4 py-3 bg-[#0b1118] border border-[#1b2935] rounded-xl"
               >
-                <div className="w-8 h-8 rounded-lg bg-emerald-50 flex items-center justify-center shrink-0">
-                  <CheckCircle2 size={15} className="text-emerald-600" />
+                <div className="w-8 h-8 rounded-lg bg-emerald-400/[0.045] flex items-center justify-center shrink-0">
+                  <CheckCircle2 size={15} className="text-emerald-400" />
                 </div>
                 <div className="flex-1">
-                  <p className="text-xs text-slate-600 leading-relaxed">{lesson.lesson}</p>
+                  <p className="text-xs text-slate-400 leading-relaxed">{lesson.lesson}</p>
                   <div className="flex items-center gap-1 mt-1.5">
                     {lesson.appliesTo.map((pid) => {
                       const platform = PLATFORMS.find((p) => p.id === pid);
@@ -292,14 +292,14 @@ export function InstagramPilotView() {
             {instagramOnlyLessons.map((lesson) => (
               <div
                 key={lesson.id}
-                className="flex items-start gap-3 px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl"
+                className="flex items-start gap-3 px-4 py-3 bg-[#070b10] border border-[#1b2935] rounded-xl"
               >
-                <div className="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center shrink-0">
+                <div className="w-8 h-8 rounded-lg bg-[#101820] flex items-center justify-center shrink-0">
                   <Lock size={15} className="text-slate-400" />
                 </div>
                 <div className="flex-1">
                   <p className="text-xs text-slate-500 leading-relaxed">{lesson.lesson}</p>
-                  <span className="inline-block mt-1.5 text-[10px] font-medium px-1.5 py-0.5 rounded-md bg-slate-100 text-slate-400">
+                  <span className="inline-block mt-1.5 text-[10px] font-medium px-1.5 py-0.5 rounded-md bg-[#101820] text-slate-400">
                     Instagram only
                   </span>
                 </div>
@@ -313,8 +313,8 @@ export function InstagramPilotView() {
       <div
         className={`rounded-xl border p-5 transition-all ${
           pilotComplete
-            ? 'bg-emerald-50 border-emerald-300'
-            : 'bg-slate-50 border-slate-200'
+            ? 'bg-emerald-400/[0.045] border-emerald-300'
+            : 'bg-[#070b10] border-[#1b2935]'
         }`}
       >
         <div className="flex items-center gap-3">
@@ -325,13 +325,13 @@ export function InstagramPilotView() {
           >
             <ShieldCheck
               size={20}
-              className={pilotComplete ? 'text-emerald-600' : 'text-slate-400'}
+              className={pilotComplete ? 'text-emerald-400' : 'text-slate-400'}
             />
           </div>
           <div>
             <h3
               className={`text-sm font-semibold ${
-                pilotComplete ? 'text-emerald-800' : 'text-slate-700'
+                pilotComplete ? 'text-emerald-800' : 'text-slate-300'
               }`}
             >
               {pilotComplete

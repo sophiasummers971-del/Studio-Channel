@@ -21,25 +21,25 @@ const PINTEREST_COLOR = '#E60023';
 
 const PRIORITY_STYLES: Record<string, { bg: string; text: string; label: string }> = {
   core: { bg: 'bg-red-50', text: 'text-red-700', label: 'Core' },
-  supporting: { bg: 'bg-slate-100', text: 'text-slate-600', label: 'Supporting' },
-  experimental: { bg: 'bg-amber-50', text: 'text-amber-700', label: 'Experimental' },
+  supporting: { bg: 'bg-[#101820]', text: 'text-slate-400', label: 'Supporting' },
+  experimental: { bg: 'bg-amber-400/[0.05]', text: 'text-amber-200/75', label: 'Experimental' },
 };
 
 const EFFORT_STYLES: Record<string, string> = {
-  minimal: 'text-emerald-600',
+  minimal: 'text-emerald-400',
   light: 'text-sky-600',
   moderate: 'text-amber-600',
 };
 
 const TEST_STATUS_STYLES: Record<string, { bg: string; text: string; label: string }> = {
-  pending: { bg: 'bg-slate-100', text: 'text-slate-500', label: 'Pending' },
-  running: { bg: 'bg-sky-50', text: 'text-sky-600', label: 'Running' },
-  passed: { bg: 'bg-emerald-50', text: 'text-emerald-600', label: 'Passed' },
+  pending: { bg: 'bg-[#101820]', text: 'text-slate-500', label: 'Pending' },
+  running: { bg: 'bg-cyan-400/[0.04]', text: 'text-sky-600', label: 'Running' },
+  passed: { bg: 'bg-emerald-400/[0.045]', text: 'text-emerald-400', label: 'Passed' },
   failed: { bg: 'bg-rose-50', text: 'text-rose-600', label: 'Failed' },
 };
 
 const AUDIENCE_STYLES: Record<string, string> = {
-  large: 'text-emerald-600',
+  large: 'text-emerald-400',
   medium: 'text-amber-600',
   niche: 'text-slate-500',
 };
@@ -80,7 +80,7 @@ export function PinterestSetupView() {
             <Image size={22} style={{ color: PINTEREST_COLOR }} />
           </div>
           <div>
-            <h2 className="text-2xl font-bold text-slate-900">Pinterest Channel Setup</h2>
+            <h2 className="text-2xl font-bold text-slate-100">Pinterest Channel Setup</h2>
             <p className="text-sm text-slate-500">
               A repeatable Pinterest workflow for visual discovery pins and evergreen boards —
               designed to grow search-driven traffic with minimal weekly approval overhead.
@@ -110,7 +110,7 @@ export function PinterestSetupView() {
       <div className="mb-8">
         <div className="flex items-center gap-2 mb-4">
           <Target size={16} className="text-slate-400" />
-          <h3 className="text-sm font-semibold text-slate-700">Best Niche Direction for Pinterest</h3>
+          <h3 className="text-sm font-semibold text-slate-300">Best Niche Direction for Pinterest</h3>
         </div>
         <div className="grid grid-cols-1 gap-3">
           {nicheOptions.map((niche) => {
@@ -123,19 +123,19 @@ export function PinterestSetupView() {
                 className={`flex items-start gap-4 px-5 py-4 rounded-xl border text-left transition-all ${
                   isSelected
                     ? 'bg-red-50/50 border-red-300 ring-1 ring-red-200'
-                    : 'bg-white border-slate-200 hover:bg-slate-50'
+                    : 'bg-[#0b1118] border-[#1b2935] hover:bg-[#070b10]'
                 }`}
               >
                 <div
                   className={`w-6 h-6 rounded-full flex items-center justify-center shrink-0 mt-0.5 transition-all ${
-                    isSelected ? 'bg-red-500' : 'bg-white border-2 border-slate-300'
+                    isSelected ? 'bg-red-500' : 'bg-[#0b1118] border-2 border-slate-300'
                   }`}
                 >
                   {isSelected && <CheckCircle2 size={14} className="text-white" />}
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-1">
-                    <h4 className="text-sm font-semibold text-slate-900">{niche.label}</h4>
+                    <h4 className="text-sm font-semibold text-slate-100">{niche.label}</h4>
                     {niche.recommended && (
                       <span className="flex items-center gap-1 text-[10px] font-medium px-2 py-0.5 rounded-full bg-red-100 text-red-700">
                         <Sparkles size={10} />
@@ -164,7 +164,7 @@ export function PinterestSetupView() {
                       <span className="text-slate-400">Monetization:</span>
                       <span className={`font-medium ${
                         niche.monetizationPotential === 'high'
-                          ? 'text-emerald-600'
+                          ? 'text-emerald-400'
                           : niche.monetizationPotential === 'medium'
                           ? 'text-amber-600'
                           : 'text-slate-500'
@@ -189,7 +189,7 @@ export function PinterestSetupView() {
       <div className="mb-8">
         <div className="flex items-center gap-2 mb-4">
           <Layers size={16} className="text-slate-400" />
-          <h3 className="text-sm font-semibold text-slate-700">Content Types to Prioritize</h3>
+          <h3 className="text-sm font-semibold text-slate-300">Content Types to Prioritize</h3>
         </div>
         <div className="grid grid-cols-1 gap-2">
           {contentPillars.map((pillar) => {
@@ -197,14 +197,14 @@ export function PinterestSetupView() {
             return (
               <div
                 key={pillar.id}
-                className="flex items-start gap-3 px-4 py-3 bg-white border border-slate-200 rounded-xl"
+                className="flex items-start gap-3 px-4 py-3 bg-[#0b1118] border border-[#1b2935] rounded-xl"
               >
-                <div className="w-9 h-9 rounded-lg bg-slate-100 flex items-center justify-center shrink-0">
+                <div className="w-9 h-9 rounded-lg bg-[#101820] flex items-center justify-center shrink-0">
                   <Layers size={16} className="text-slate-500" />
                 </div>
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-1">
-                    <h4 className="text-sm font-semibold text-slate-800">{pillar.label}</h4>
+                    <h4 className="text-sm font-semibold text-slate-200">{pillar.label}</h4>
                     <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full ${style.bg} ${style.text}`}>
                       {style.label}
                     </span>
@@ -215,7 +215,7 @@ export function PinterestSetupView() {
                     {pillar.exampleFormats.map((fmt, i) => (
                       <span
                         key={i}
-                        className="text-[10px] font-medium px-2 py-0.5 rounded-md bg-slate-50 text-slate-500 border border-slate-100"
+                        className="text-[10px] font-medium px-2 py-0.5 rounded-md bg-[#070b10] text-slate-500 border border-[#14202a]"
                       >
                         {fmt}
                       </span>
@@ -232,7 +232,7 @@ export function PinterestSetupView() {
       <div className="mb-8">
         <div className="flex items-center gap-2 mb-4">
           <Zap size={16} className="text-slate-400" />
-          <h3 className="text-sm font-semibold text-slate-700">Daily AI-Generated Post Flow</h3>
+          <h3 className="text-sm font-semibold text-slate-300">Daily AI-Generated Post Flow</h3>
         </div>
         <div className="relative">
           <div className="absolute left-[21px] top-2 bottom-2 w-px bg-slate-200" />
@@ -241,7 +241,7 @@ export function PinterestSetupView() {
               <div key={step.id} className="flex items-start gap-3 relative">
                 <div
                   className={`w-11 h-11 rounded-xl flex items-center justify-center shrink-0 z-10 ${
-                    step.automated ? 'bg-red-100' : 'bg-slate-100'
+                    step.automated ? 'bg-red-100' : 'bg-[#101820]'
                   }`}
                 >
                   {step.automated ? (
@@ -250,16 +250,16 @@ export function PinterestSetupView() {
                     <Users size={16} className="text-slate-500" />
                   )}
                 </div>
-                <div className="flex-1 px-4 py-3 bg-white border border-slate-200 rounded-xl">
+                <div className="flex-1 px-4 py-3 bg-[#0b1118] border border-[#1b2935] rounded-xl">
                   <div className="flex items-center gap-2 mb-1">
                     <span className="text-[10px] font-bold text-slate-400">STEP {step.step}</span>
-                    <h4 className="text-sm font-semibold text-slate-800">{step.label}</h4>
+                    <h4 className="text-sm font-semibold text-slate-200">{step.label}</h4>
                     {step.automated ? (
                       <span className="text-[10px] font-medium px-1.5 py-0.5 rounded bg-red-50 text-red-600">
                         Automated
                       </span>
                     ) : (
-                      <span className="text-[10px] font-medium px-1.5 py-0.5 rounded bg-slate-100 text-slate-500">
+                      <span className="text-[10px] font-medium px-1.5 py-0.5 rounded bg-[#101820] text-slate-500">
                         Manual
                       </span>
                     )}
@@ -280,12 +280,12 @@ export function PinterestSetupView() {
       <div className="mb-8">
         <div className="flex items-center gap-2 mb-4">
           <Calendar size={16} className="text-slate-400" />
-          <h3 className="text-sm font-semibold text-slate-700">Weekly Posting Schedule</h3>
+          <h3 className="text-sm font-semibold text-slate-300">Weekly Posting Schedule</h3>
         </div>
-        <div className="overflow-hidden rounded-xl border border-slate-200">
+        <div className="overflow-hidden rounded-xl border border-[#1b2935]">
           <table className="w-full text-sm">
             <thead>
-              <tr className="bg-slate-50 border-b border-slate-200">
+              <tr className="bg-[#070b10] border-b border-[#1b2935]">
                 <th className="text-left text-[11px] font-semibold uppercase tracking-wide text-slate-400 px-4 py-2.5">Day</th>
                 <th className="text-left text-[11px] font-semibold uppercase tracking-wide text-slate-400 px-4 py-2.5">Content Pillar</th>
                 <th className="text-left text-[11px] font-semibold uppercase tracking-wide text-slate-400 px-4 py-2.5">Format</th>
@@ -296,9 +296,9 @@ export function PinterestSetupView() {
               {weeklySchedule.map((row, i) => (
                 <tr
                   key={i}
-                  className={`border-b border-slate-100 last:border-b-0 ${i % 2 === 1 ? 'bg-slate-50/30' : ''}`}
+                  className={`border-b border-[#14202a] last:border-b-0 ${i % 2 === 1 ? 'bg-[#070b10]/30' : ''}`}
                 >
-                  <td className="px-4 py-2.5 text-xs font-medium text-slate-700">{row.day}</td>
+                  <td className="px-4 py-2.5 text-xs font-medium text-slate-300">{row.day}</td>
                   <td className="px-4 py-2.5 text-xs text-slate-500">{row.pillar}</td>
                   <td className="px-4 py-2.5 text-xs text-slate-500">{row.format}</td>
                   <td className="px-4 py-2.5 text-xs text-slate-500">{row.time}</td>
@@ -313,21 +313,21 @@ export function PinterestSetupView() {
       <div className="mb-8">
         <div className="flex items-center gap-2 mb-4">
           <ClipboardCheck size={16} className="text-slate-400" />
-          <h3 className="text-sm font-semibold text-slate-700">Lightweight Review & Approval Rhythm</h3>
+          <h3 className="text-sm font-semibold text-slate-300">Lightweight Review & Approval Rhythm</h3>
           <span className="text-xs text-slate-400">Designed for minimal weekly overhead</span>
         </div>
         <div className="grid grid-cols-1 gap-2">
           {reviewRhythm.map((item) => (
             <div
               key={item.id}
-              className="flex items-start gap-3 px-4 py-3 bg-white border border-slate-200 rounded-xl"
+              className="flex items-start gap-3 px-4 py-3 bg-[#0b1118] border border-[#1b2935] rounded-xl"
             >
-              <div className="w-9 h-9 rounded-lg bg-slate-100 flex items-center justify-center shrink-0">
+              <div className="w-9 h-9 rounded-lg bg-[#101820] flex items-center justify-center shrink-0">
                 <ClipboardCheck size={16} className="text-slate-500" />
               </div>
               <div className="flex-1">
                 <div className="flex items-center gap-2 mb-1">
-                  <h4 className="text-sm font-semibold text-slate-800">{item.label}</h4>
+                  <h4 className="text-sm font-semibold text-slate-200">{item.label}</h4>
                   <span className={`text-[10px] font-medium ${EFFORT_STYLES[item.effort]}`}>
                     {item.effort} effort
                   </span>
@@ -347,7 +347,7 @@ export function PinterestSetupView() {
       <div className="mb-8">
         <div className="flex items-center gap-2 mb-4">
           <FlaskConical size={16} className="text-slate-400" />
-          <h3 className="text-sm font-semibold text-slate-700">Simple Testing Approach for Growth</h3>
+          <h3 className="text-sm font-semibold text-slate-300">Simple Testing Approach for Growth</h3>
           <span className="text-xs text-slate-400">
             ({completedTests}/{growthTests.length} completed, {passedTests} passed)
           </span>
@@ -359,7 +359,7 @@ export function PinterestSetupView() {
               <button
                 key={test.id}
                 onClick={() => cycleTestStatus(test.id)}
-                className="w-full flex items-start gap-3 px-4 py-3 bg-white border border-slate-200 rounded-xl text-left hover:bg-slate-50 transition-all"
+                className="w-full flex items-start gap-3 px-4 py-3 bg-[#0b1118] border border-[#1b2935] rounded-xl text-left hover:bg-[#070b10] transition-all"
               >
                 <div
                   className={`w-9 h-9 rounded-lg flex items-center justify-center shrink-0 ${style.bg}`}
@@ -374,7 +374,7 @@ export function PinterestSetupView() {
                 </div>
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-1">
-                    <h4 className="text-sm font-semibold text-slate-800">{test.label}</h4>
+                    <h4 className="text-sm font-semibold text-slate-200">{test.label}</h4>
                     <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full ${style.bg} ${style.text}`}>
                       {style.label}
                     </span>
@@ -384,7 +384,7 @@ export function PinterestSetupView() {
                   <div className="flex items-center gap-1.5">
                     <TrendingUp size={11} className="text-slate-400" />
                     <span className="text-[11px] text-slate-400">Metric: </span>
-                    <span className="text-[11px] font-medium text-slate-600">{test.metric}</span>
+                    <span className="text-[11px] font-medium text-slate-400">{test.metric}</span>
                   </div>
                 </div>
               </button>
@@ -400,28 +400,28 @@ export function PinterestSetupView() {
       <div className="mb-8">
         <div className="flex items-center gap-2 mb-4">
           <DollarSign size={16} className="text-slate-400" />
-          <h3 className="text-sm font-semibold text-slate-700">Monetization Paths for Passive Income</h3>
+          <h3 className="text-sm font-semibold text-slate-300">Monetization Paths for Passive Income</h3>
         </div>
         <div className="grid grid-cols-1 gap-2">
           {monetizationPaths.map((path) => (
             <div
               key={path.id}
-              className="flex items-start gap-3 px-4 py-3 bg-white border border-slate-200 rounded-xl"
+              className="flex items-start gap-3 px-4 py-3 bg-[#0b1118] border border-[#1b2935] rounded-xl"
             >
-              <div className="w-9 h-9 rounded-lg bg-emerald-50 flex items-center justify-center shrink-0">
-                <DollarSign size={16} className="text-emerald-600" />
+              <div className="w-9 h-9 rounded-lg bg-emerald-400/[0.045] flex items-center justify-center shrink-0">
+                <DollarSign size={16} className="text-emerald-400" />
               </div>
               <div className="flex-1">
                 <div className="flex items-center gap-2 mb-1">
-                  <h4 className="text-sm font-semibold text-slate-800">{path.label}</h4>
+                  <h4 className="text-sm font-semibold text-slate-200">{path.label}</h4>
                   {path.passive && (
-                    <span className="flex items-center gap-1 text-[10px] font-medium px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-600">
+                    <span className="flex items-center gap-1 text-[10px] font-medium px-2 py-0.5 rounded-full bg-emerald-400/[0.045] text-emerald-400">
                       <Sparkles size={10} />
                       Passive
                     </span>
                   )}
                   <span className={`text-[10px] font-medium ${
-                    path.effort === 'low' ? 'text-emerald-600' : path.effort === 'medium' ? 'text-amber-600' : 'text-rose-500'
+                    path.effort === 'low' ? 'text-emerald-400' : path.effort === 'medium' ? 'text-amber-600' : 'text-rose-500'
                   }`}>
                     {path.effort} effort
                   </span>
@@ -438,15 +438,15 @@ export function PinterestSetupView() {
       </div>
 
       {/* Summary */}
-      <div className="rounded-xl border border-slate-200 bg-slate-50 p-5">
+      <div className="rounded-xl border border-[#1b2935] bg-[#070b10] p-5">
         <div className="flex items-start gap-3">
           <div className="w-10 h-10 rounded-xl bg-slate-200 flex items-center justify-center shrink-0">
             <Image size={20} className="text-slate-500" />
           </div>
           <div>
-            <h3 className="text-sm font-semibold text-slate-700">Setup Summary</h3>
+            <h3 className="text-sm font-semibold text-slate-300">Setup Summary</h3>
             <p className="text-xs text-slate-500 mt-0.5 leading-relaxed">
-              Niche: <span className="font-medium text-slate-700">{selectedNiche.label}</span>.
+              Niche: <span className="font-medium text-slate-300">{selectedNiche.label}</span>.
               Post one faceless pin per day across core and supporting pillars. The AI pulls
               high-intent keywords, designs the pin (title overlay + visual), and assigns it to the
               right board with an SEO caption — you approve each day's pin. Pins stay evergreen, so

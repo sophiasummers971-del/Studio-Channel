@@ -40,14 +40,14 @@ export function TopBar({ activeView, activePlatform, onSearch, searchQuery, onNe
     : [VIEW_LABELS[activeView]];
 
   return (
-    <header className="sticky top-0 z-30 bg-white/80 backdrop-blur-md border-b border-slate-200 px-8 py-3.5">
+    <header className="sticky top-0 z-30 bg-[#070b10]/90 backdrop-blur-xl border-b border-[#182631] px-8 py-3.5">
       <div className="flex items-center justify-between gap-6">
         <div className="flex items-center gap-2 text-sm">
           {breadcrumb.map((crumb, i) => (
             <span key={i} className="flex items-center gap-2">
               {i > 0 && <span className="text-slate-300">/</span>}
               <span
-                className={i === breadcrumb.length - 1 ? 'text-slate-900 font-medium' : 'text-slate-500'}
+                className={i === breadcrumb.length - 1 ? 'text-slate-100 font-medium' : 'text-slate-500'}
               >
                 {crumb}
               </span>
@@ -63,13 +63,13 @@ export function TopBar({ activeView, activePlatform, onSearch, searchQuery, onNe
               value={searchQuery}
               onChange={(e) => onSearch(e.target.value)}
               placeholder="Search content..."
-              className="w-64 pl-9 pr-4 py-2 text-sm bg-slate-100 border border-transparent rounded-lg outline-none transition-all focus:bg-white focus:border-sky-300 focus:ring-2 focus:ring-sky-100 placeholder:text-slate-400"
+              className="w-64 pl-9 pr-4 py-2 text-sm bg-[#0b1219] border border-[#1c2b37] text-slate-200 rounded-lg outline-none transition-all focus:border-cyan-400/40 focus:ring-2 focus:ring-cyan-400/5 placeholder:text-slate-600"
             />
           </div>
-          <button className="relative p-2 rounded-lg hover:bg-slate-100 transition-colors">
+          <button className="relative p-2 rounded-lg hover:bg-white/[0.04] transition-colors">
             <Bell size={18} className="text-slate-600" />
           </button>
-          <button onClick={onNewContent} className="flex items-center gap-2 px-4 py-2 bg-slate-900 text-white text-sm font-medium rounded-lg hover:bg-slate-800 transition-all shadow-sm hover:shadow-md">
+          <button onClick={onNewContent} className="flex items-center gap-2 px-4 py-2 bg-cyan-400/10 border border-cyan-400/20 text-cyan-200 text-sm font-medium rounded-lg hover:bg-cyan-400/15 transition-all shadow-[0_0_22px_rgba(34,211,238,0.05)]">
             <Plus size={16} />
             New Content
           </button>

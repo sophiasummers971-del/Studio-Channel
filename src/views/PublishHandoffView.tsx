@@ -79,7 +79,7 @@ export function PublishHandoffView() {
             <Rocket size={22} className="text-white" />
           </div>
           <div>
-            <h2 className="text-2xl font-bold text-slate-900">Publish Handoff</h2>
+            <h2 className="text-2xl font-bold text-slate-100">Publish Handoff</h2>
             <p className="text-sm text-slate-500">
               Scheduled content ready to publish — push to live platforms
             </p>
@@ -94,7 +94,7 @@ export function PublishHandoffView() {
           className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
             !activePlatform
               ? 'bg-slate-900 text-white'
-              : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50'
+              : 'bg-[#0b1118] border border-[#1b2935] text-slate-400 hover:bg-[#070b10]'
           }`}
         >
           All ({scheduled.length})
@@ -109,13 +109,13 @@ export function PublishHandoffView() {
               className={`px-4 py-2 rounded-lg text-sm font-medium transition-all flex items-center gap-2 ${
                 activePlatform === p.id
                   ? 'text-white shadow-md'
-                  : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50'
+                  : 'bg-[#0b1118] border border-[#1b2935] text-slate-400 hover:bg-[#070b10]'
               }`}
               style={activePlatform === p.id ? { backgroundColor: p.color } : {}}
             >
               <span>{p.label}</span>
               <span className={`text-[10px] px-1.5 py-0.5 rounded-full ${
-                activePlatform === p.id ? 'bg-white/20' : 'bg-slate-100'
+                activePlatform === p.id ? 'bg-[#0b1118]/20' : 'bg-[#101820]'
               }`}>
                 {count}
               </span>
@@ -126,19 +126,19 @@ export function PublishHandoffView() {
 
       {/* Stats bar */}
       <div className="grid grid-cols-4 gap-3 mb-6">
-        <div className="bg-white border border-slate-200 rounded-xl p-4">
+        <div className="bg-[#0b1118] border border-[#1b2935] rounded-xl p-4">
           <p className="text-xs font-semibold text-slate-500 mb-1">Total</p>
-          <p className="text-2xl font-bold text-slate-900">{filtered.length}</p>
+          <p className="text-2xl font-bold text-slate-100">{filtered.length}</p>
         </div>
-        <div className="bg-white border border-slate-200 rounded-xl p-4">
+        <div className="bg-[#0b1118] border border-[#1b2935] rounded-xl p-4">
           <p className="text-xs font-semibold text-slate-500 mb-1">Queued</p>
           <p className="text-2xl font-bold text-sky-600">{pendingCount}</p>
         </div>
-        <div className="bg-white border border-slate-200 rounded-xl p-4">
+        <div className="bg-[#0b1118] border border-[#1b2935] rounded-xl p-4">
           <p className="text-xs font-semibold text-slate-500 mb-1">Published</p>
-          <p className="text-2xl font-bold text-emerald-600">{publishedCount}</p>
+          <p className="text-2xl font-bold text-emerald-400">{publishedCount}</p>
         </div>
-        <div className="bg-white border border-slate-200 rounded-xl p-4">
+        <div className="bg-[#0b1118] border border-[#1b2935] rounded-xl p-4">
           <p className="text-xs font-semibold text-slate-500 mb-1">Failed</p>
           <p className="text-2xl font-bold text-rose-600">{failedCount}</p>
         </div>
@@ -146,11 +146,11 @@ export function PublishHandoffView() {
 
       {/* Bulk actions */}
       {activePlatform && pendingCount > 0 && (
-        <div className="bg-white border border-slate-200 rounded-xl p-4 mb-6 flex items-center justify-between">
+        <div className="bg-[#0b1118] border border-[#1b2935] rounded-xl p-4 mb-6 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <Zap size={18} className="text-amber-500" />
             <div>
-              <p className="text-sm font-medium text-slate-800">
+              <p className="text-sm font-medium text-slate-200">
                 {pendingCount} {getPlatform(activePlatform)?.label} items ready to publish
               </p>
               <p className="text-xs text-slate-400">
@@ -176,7 +176,7 @@ export function PublishHandoffView() {
       {/* Content list */}
       {filtered.length === 0 ? (
         <div className="text-center py-20">
-          <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-slate-100 flex items-center justify-center">
+          <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-[#101820] flex items-center justify-center">
             <Send size={28} className="text-slate-300" />
           </div>
           <p className="text-slate-500 font-medium mb-1">No scheduled content</p>
@@ -199,7 +199,7 @@ export function PublishHandoffView() {
             return (
               <div
                 key={item.id}
-                className="bg-white border border-slate-200 rounded-xl p-4 hover:shadow-sm transition-shadow"
+                className="bg-[#0b1118] border border-[#1b2935] rounded-xl p-4 hover:shadow-sm transition-shadow"
               >
                 <div className="flex items-center gap-3">
                   {/* Platform badge */}
@@ -212,7 +212,7 @@ export function PublishHandoffView() {
 
                   {/* Content info */}
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-slate-800 truncate">{item.title}</p>
+                    <p className="text-sm font-medium text-slate-200 truncate">{item.title}</p>
                     <p className="text-xs text-slate-400">
                       {platform?.label} · {format?.label}
                       {job?.externalId && ` · Pin ${job.externalId.substring(0, 8)}...`}
@@ -235,8 +235,8 @@ export function PublishHandoffView() {
                       disabled={isPublishing}
                       className={`flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold rounded-lg transition-all shrink-0 ${
                         status === 'failed'
-                          ? 'bg-amber-50 text-amber-700 border border-amber-200 hover:bg-amber-100'
-                          : 'bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100'
+                          ? 'bg-amber-400/[0.05] text-amber-200/75 border border-amber-400/15 hover:bg-amber-100'
+                          : 'bg-emerald-400/[0.045] text-emerald-700 border border-emerald-400/20 hover:bg-emerald-100'
                       } disabled:opacity-50`}
                     >
                       {isPublishing ? (
@@ -256,7 +256,7 @@ export function PublishHandoffView() {
                       href={job.externalUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="p-2 rounded-lg hover:bg-slate-100 text-slate-400 hover:text-sky-600 transition-all shrink-0"
+                      className="p-2 rounded-lg hover:bg-[#101820] text-slate-400 hover:text-sky-600 transition-all shrink-0"
                     >
                       <ExternalLink size={16} />
                     </a>
@@ -278,13 +278,13 @@ export function PublishHandoffView() {
                   </div>
                 )}
                 {result?.ok && result.pinLink && (
-                  <div className="mt-2 ml-13 pl-3 border-l-2 border-emerald-200 flex items-center gap-2">
+                  <div className="mt-2 ml-13 pl-3 border-l-2 border-emerald-400/20 flex items-center gap-2">
                     <CheckCircle2 size={13} className="text-emerald-500" />
                     <a
                       href={result.pinLink}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-xs text-emerald-600 hover:underline"
+                      className="text-xs text-emerald-400 hover:underline"
                     >
                       View live pin
                     </a>

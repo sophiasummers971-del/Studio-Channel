@@ -63,7 +63,7 @@ export function UniversalWorkflowView({ workflow, onNavigateToApproval }: Univer
   return (
     <div className="p-8 max-w-6xl mx-auto">
       <div className="mb-6">
-        <h2 className="text-2xl font-bold text-slate-900 mb-1">Universal Baseline Workflow</h2>
+        <h2 className="text-2xl font-bold text-slate-100 mb-1">Universal Baseline Workflow</h2>
         <p className="text-sm text-slate-500">
           One repeatable daily flow that generates content across all channels. Runs automatically,
           requires only a weekly approval pass, and acts as the safety line if a channel-specific flow breaks.
@@ -71,14 +71,14 @@ export function UniversalWorkflowView({ workflow, onNavigateToApproval }: Univer
       </div>
 
       {/* Run Control Bar */}
-      <div className="bg-white border border-slate-200 rounded-xl p-5 mb-6">
+      <div className="bg-[#0b1118] border border-[#1b2935] rounded-xl p-5 mb-6">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-sky-50 flex items-center justify-center">
+            <div className="w-10 h-10 rounded-xl bg-cyan-400/[0.04] flex items-center justify-center">
               <Zap size={20} className="text-sky-500" />
             </div>
             <div>
-              <h3 className="text-sm font-semibold text-slate-800">Daily Run — Aug 16, 2026</h3>
+              <h3 className="text-sm font-semibold text-slate-200">Daily Run — Aug 16, 2026</h3>
               <p className="text-xs text-slate-400">
                 {completedCount} of {runStates.length} daily stages complete
               </p>
@@ -87,7 +87,7 @@ export function UniversalWorkflowView({ workflow, onNavigateToApproval }: Univer
           <div className="flex items-center gap-2">
             <button
               onClick={resetRun}
-              className="flex items-center gap-1.5 px-3 py-2 text-sm text-slate-600 bg-slate-100 rounded-lg hover:bg-slate-200 transition-colors"
+              className="flex items-center gap-1.5 px-3 py-2 text-sm text-slate-400 bg-[#101820] rounded-lg hover:bg-slate-200 transition-colors"
             >
               <RotateCcw size={14} />
               Reset
@@ -105,7 +105,7 @@ export function UniversalWorkflowView({ workflow, onNavigateToApproval }: Univer
         </div>
 
         {/* Progress bar */}
-        <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
+        <div className="w-full h-2 bg-[#101820] rounded-full overflow-hidden">
           <div
             className="h-full bg-gradient-to-r from-sky-400 to-sky-500 rounded-full transition-all duration-500"
             style={{ width: `${(completedCount / runStates.length) * 100}%` }}
@@ -117,7 +117,7 @@ export function UniversalWorkflowView({ workflow, onNavigateToApproval }: Univer
       <div className="mb-8">
         <div className="flex items-center gap-2 mb-4">
           <Clock size={16} className="text-slate-400" />
-          <h3 className="text-sm font-semibold text-slate-700">Daily Sequence</h3>
+          <h3 className="text-sm font-semibold text-slate-300">Daily Sequence</h3>
           <span className="text-xs text-slate-400">— runs every day at 7:00 AM</span>
         </div>
 
@@ -132,12 +132,12 @@ export function UniversalWorkflowView({ workflow, onNavigateToApproval }: Univer
             return (
               <div
                 key={stage.id}
-                className={`bg-white border rounded-xl p-4 transition-all ${
+                className={`bg-[#0b1118] border rounded-xl p-4 transition-all ${
                   isRunning
                     ? 'border-amber-300 shadow-md ring-2 ring-amber-100'
                     : status === 'complete'
-                    ? 'border-slate-200'
-                    : 'border-slate-200 opacity-70'
+                    ? 'border-[#1b2935]'
+                    : 'border-[#1b2935] opacity-70'
                 }`}
               >
                 <div className="flex items-start gap-4">
@@ -159,7 +159,7 @@ export function UniversalWorkflowView({ workflow, onNavigateToApproval }: Univer
                         <span className="text-[10px] font-bold text-slate-400">
                           {String(i + 1).padStart(2, '0')}
                         </span>
-                        <h4 className="text-sm font-semibold text-slate-800">{stage.label}</h4>
+                        <h4 className="text-sm font-semibold text-slate-200">{stage.label}</h4>
                       </div>
                       <span
                         className="flex items-center gap-1 text-[10px] font-medium px-2 py-0.5 rounded-full"
@@ -181,7 +181,7 @@ export function UniversalWorkflowView({ workflow, onNavigateToApproval }: Univer
                   {isRunning && (
                     <button
                       onClick={() => advanceStage(stage.id)}
-                      className="px-3 py-1.5 text-xs font-medium text-sky-600 bg-sky-50 rounded-lg hover:bg-sky-100 transition-colors shrink-0"
+                      className="px-3 py-1.5 text-xs font-medium text-sky-600 bg-cyan-400/[0.04] rounded-lg hover:bg-sky-100 transition-colors shrink-0"
                     >
                       Complete
                     </button>
@@ -202,7 +202,7 @@ export function UniversalWorkflowView({ workflow, onNavigateToApproval }: Univer
       <div className="mb-8">
         <div className="flex items-center gap-2 mb-4">
           <CheckSquare size={16} className="text-slate-400" />
-          <h3 className="text-sm font-semibold text-slate-700">Weekly Rhythm</h3>
+          <h3 className="text-sm font-semibold text-slate-300">Weekly Rhythm</h3>
           <span className="text-xs text-slate-400">— runs once per week</span>
         </div>
         <div className="grid grid-cols-3 gap-3">
@@ -212,17 +212,17 @@ export function UniversalWorkflowView({ workflow, onNavigateToApproval }: Univer
               <button
                 key={stage.id}
                 onClick={onNavigateToApproval}
-                className="bg-white border border-slate-200 rounded-xl p-4 text-left hover:shadow-md hover:border-slate-300 transition-all group"
+                className="bg-[#0b1118] border border-[#1b2935] rounded-xl p-4 text-left hover:shadow-md hover:border-slate-300 transition-all group"
               >
                 <div className="flex items-center gap-2 mb-3">
-                  <div className="w-9 h-9 rounded-lg bg-violet-50 flex items-center justify-center">
+                  <div className="w-9 h-9 rounded-lg bg-violet-400/[0.045] flex items-center justify-center">
                     <Icon size={17} className="text-violet-500" />
                   </div>
                   <span className="text-[10px] font-bold text-slate-400">
                     {String(dailyStages.length + i + 1).padStart(2, '0')}
                   </span>
                 </div>
-                <h4 className="text-sm font-semibold text-slate-800 mb-1 group-hover:text-sky-600 transition-colors">
+                <h4 className="text-sm font-semibold text-slate-200 mb-1 group-hover:text-sky-600 transition-colors">
                   {stage.label}
                 </h4>
                 <p className="text-xs text-slate-500 leading-relaxed">{stage.description}</p>
@@ -240,11 +240,11 @@ export function UniversalWorkflowView({ workflow, onNavigateToApproval }: Univer
 
       {/* Today's Run Log */}
       <div className="mb-8">
-        <h3 className="text-sm font-semibold text-slate-700 mb-3">Today's Run Log</h3>
-        <div className="bg-white border border-slate-200 rounded-xl overflow-hidden">
+        <h3 className="text-sm font-semibold text-slate-300 mb-3">Today's Run Log</h3>
+        <div className="bg-[#0b1118] border border-[#1b2935] rounded-xl overflow-hidden">
           <table className="w-full">
             <thead>
-              <tr className="bg-slate-50 border-b border-slate-200">
+              <tr className="bg-[#070b10] border-b border-[#1b2935]">
                 <th className="text-left text-[10px] font-semibold uppercase tracking-wide text-slate-400 px-4 py-2.5">Stage</th>
                 <th className="text-left text-[10px] font-semibold uppercase tracking-wide text-slate-400 px-4 py-2.5">Status</th>
                 <th className="text-right text-[10px] font-semibold uppercase tracking-wide text-slate-400 px-4 py-2.5">Processed</th>
@@ -258,16 +258,16 @@ export function UniversalWorkflowView({ workflow, onNavigateToApproval }: Univer
                 const cfg = STATUS_CONFIG[run.status];
                 const StatusIcon = cfg.icon;
                 return (
-                  <tr key={run.id} className="border-b border-slate-100 last:border-0 hover:bg-slate-50/50 transition-colors">
-                    <td className="px-4 py-2.5 text-sm text-slate-700">{stage?.label || run.stage}</td>
+                  <tr key={run.id} className="border-b border-[#14202a] last:border-0 hover:bg-[#070b10]/50 transition-colors">
+                    <td className="px-4 py-2.5 text-sm text-slate-300">{stage?.label || run.stage}</td>
                     <td className="px-4 py-2.5">
                       <span className="flex items-center gap-1.5 text-xs font-medium" style={{ color: cfg.color }}>
                         <StatusIcon size={12} className={run.status === 'running' ? 'animate-spin' : ''} />
                         {cfg.label}
                       </span>
                     </td>
-                    <td className="px-4 py-2.5 text-right text-sm text-slate-600">{run.itemsProcessed}</td>
-                    <td className="px-4 py-2.5 text-right text-sm text-slate-600">{run.itemsGenerated}</td>
+                    <td className="px-4 py-2.5 text-right text-sm text-slate-400">{run.itemsProcessed}</td>
+                    <td className="px-4 py-2.5 text-right text-sm text-slate-400">{run.itemsGenerated}</td>
                     <td className="px-4 py-2.5 text-right text-sm text-slate-400 font-mono">{run.duration}</td>
                   </tr>
                 );
