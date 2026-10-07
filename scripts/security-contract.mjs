@@ -118,6 +118,12 @@ assert.doesNotMatch(publishClient, /VITE_SUPABASE_ANON_KEY/,
   'publishing must not authenticate privileged functions with the public anon key');
 assert.match(publishClient, /functions\.invoke\(['"]publish-pin['"]/,
   'publishing must use the authenticated Supabase function client');
+assert.doesNotMatch(publishClient, /imageUrl:\s*output\.thumbnailConcept/,
+  'Pinterest publishing must never use thumbnail concept text as media');
+assert.match(publishClient, /output\.mediaUrl/,
+  'Pinterest publishing must use a dedicated media URL field');
+assert.match(publishPin, /Pinterest media URL must use HTTPS/,
+  'publish-pin must enforce HTTPS media URLs server-side');
 
 assert.match(oauthConfig, /https:\/\/www\.instagram\.com\/oauth\/authorize/,
   'Instagram must use current Instagram Business Login authorization endpoint');
