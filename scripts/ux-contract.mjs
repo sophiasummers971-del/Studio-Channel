@@ -29,4 +29,8 @@ assert.match(topbar, /onNewContent/,
 assert.match(app, /onNewContent=\{\(\) => handleNavigate\('content-generator'\)\}/,
   'App must wire New Content to the real generator');
 
+const authGate = read('src/components/AuthGate.tsx');
+assert.match(authGate, /shouldCreateUser:\s*true/,
+  'AuthGate must allow first owner identity bootstrap while RLS/operator membership remains the authorization boundary');
+
 console.log('ux contract: PASS');
