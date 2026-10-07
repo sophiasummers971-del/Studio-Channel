@@ -1,20 +1,27 @@
 // Edge Function: auth_start
-// Starts OAuth with server-generated, single-use state stored outside browser access.
+// Authenticated operators request an authorization URL. The browser never supplies OAuth state.
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { corsHeaders } from "../_shared/cors.ts";
 import { getProviderConfig, OAUTH_CALLBACK_URL } from "../_shared/config.ts";
+import { OperatorAuthError, operatorErrorResponse, requireOperator } from "../_shared/requireOperator.ts";
 
 serve(async (req: Request) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
+  if (req.method !== 'POST') {
+    return new Response(JSON.stringify({ error: 'Method not allowed' }), {
+      status: 405,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
+  }
 
   try {
-    const url = new URL(req.url);
-    const provider = url.searchParams.get('provider');
+    const { user, admin } = await requireOperator(req);
+    const body = await req.json().catch(() => ({}));
+    const provider = typeof body?.provider === 'string' ? body.provider : '';
 
     if (!provider) {
-      return new Response(JSON.stringify({ error: 'Missing provider parameter' }), {
+      return new Response(JSON.stringify({ error: 'Missing provider' }), {
         status: 400,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
@@ -29,17 +36,8 @@ serve(async (req: Request) => {
     }
 
     const clientId = Deno.env.get(config.clientIdEnv);
-    const supabaseUrl = Deno.env.get('SUPABASE_URL');
-    const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
-
-    if (!clientId) {
-      return new Response(JSON.stringify({ error: `Missing ${config.clientIdEnv} secret in Supabase` }), {
-        status: 500,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
-    }
-    if (!supabaseUrl || !serviceRoleKey || !OAUTH_CALLBACK_URL) {
-      return new Response(JSON.stringify({ error: 'OAuth server configuration is incomplete' }), {
+    if (!clientId || !OAUTH_CALLBACK_URL) {
+      return new Response(JSON.stringify({ error: 'Provider authorization is not configured' }), {
         status: 500,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
@@ -47,11 +45,10 @@ serve(async (req: Request) => {
 
     const state = crypto.randomUUID();
     const expiresAt = new Date(Date.now() + 10 * 60 * 1000).toISOString();
-    const supabase = createClient(supabaseUrl, serviceRoleKey);
 
-    const { error: stateError } = await supabase
+    const { error: stateError } = await admin
       .from('oauth_states')
-      .insert({ state, provider, expires_at: expiresAt });
+      .insert({ state, provider, user_id: user.id, expires_at: expiresAt });
 
     if (stateError) {
       console.error('OAuth state insert failed:', stateError.message);
@@ -68,11 +65,14 @@ serve(async (req: Request) => {
     authUrl.searchParams.set('redirect_uri', OAUTH_CALLBACK_URL);
     authUrl.searchParams.set('state', state);
 
-    return new Response(null, {
-      status: 302,
-      headers: { ...corsHeaders, Location: authUrl.toString() },
+    return new Response(JSON.stringify({ authorizeUrl: authUrl.toString() }), {
+      status: 200,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   } catch (err) {
+    const authResponse = operatorErrorResponse(err, corsHeaders);
+    if (authResponse) return authResponse;
+
     console.error('auth_start error:', err);
     return new Response(JSON.stringify({ error: 'Internal error' }), {
       status: 500,
