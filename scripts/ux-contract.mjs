@@ -7,6 +7,7 @@ const dashboard = read('src/views/DashboardHome.tsx');
 const contentHook = read('src/hooks/useContentData.ts');
 const topbar = read('src/components/TopBar.tsx');
 const app = read('src/App.tsx');
+const styles = read('src/index.css');
 
 for (const label of ['Home', 'Create', 'Approvals', 'Publish', 'Accounts']) {
   assert.match(sidebar, new RegExp(`label: ['"]${label}['"]`),
@@ -37,5 +38,16 @@ assert.match(app, /onNewContent=\{\(\) => handleNavigate\('content-generator'\)\
 const authGate = read('src/components/AuthGate.tsx');
 assert.match(authGate, /shouldCreateUser:\s*true/,
   'AuthGate must allow first owner identity bootstrap while RLS/operator membership remains the authorization boundary');
+
+assert.match(app, /bg-\[#05070b\]/,
+  'Studio application shell must use the full dark theme');
+assert.match(styles, /--studio-bg:/,
+  'Studio theme tokens must exist');
+assert.match(styles, /--studio-cyan:/,
+  'Studio cyber accent token must exist');
+assert.doesNotMatch(app, /bg-slate-50/,
+  'application shell must not use the light background');
+assert.match(authGate, /SECURE OPERATOR ACCESS/,
+  'AuthGate must use the unified Studio operator presentation');
 
 console.log('ux contract: PASS');
