@@ -1,5 +1,6 @@
 import { useState, useCallback, useMemo, useEffect } from 'react';
-import type { WorkflowStageId, RunStatus, ApprovalDecision } from '@/types';
+import { supabase } from '@/lib/supabase';
+import type { WorkflowStageId, RunStatus, ApprovalDecision, WorkflowRun } from '@/types';
 import { useApprovalPersistence } from './useApprovalPersistence';
 
 interface RunState {
@@ -7,22 +8,34 @@ interface RunState {
   status: RunStatus;
 }
 
-const INITIAL_RUN_STATES: RunState[] = [
-  { stageId: 'trigger', status: 'complete' },
-  { stageId: 'topic-selection', status: 'complete' },
-  { stageId: 'brief-creation', status: 'complete' },
-  { stageId: 'draft-generation', status: 'running' },
-  { stageId: 'asset-production', status: 'pending' },
-  { stageId: 'caption-variants', status: 'pending' },
+interface DbWorkflowRun {
+  id: string;
+  date: string;
+  stage: string;
+  status: string;
+  items_processed: number;
+  items_generated: number;
+  duration: string;
+}
+
+const DAILY_STAGE_IDS: WorkflowStageId[] = [
+  'trigger',
+  'topic-selection',
+  'brief-creation',
+  'draft-generation',
+  'asset-production',
+  'caption-variants',
 ];
 
 export function useWorkflow() {
-  const [runStates, setRunStates] = useState<RunState[]>(INITIAL_RUN_STATES);
-  const [fallbackActive, setFallbackActive] = useState(false);
+  const [runStates, setRunStates] = useState<RunState[]>([]);
+  const [todayRuns, setTodayRuns] = useState<WorkflowRun[]>([]);
+  const [latestRunDate, setLatestRunDate] = useState<string | null>(null);
+  const [workflowEvidenceLoading, setWorkflowEvidenceLoading] = useState(true);
+  const [workflowEvidenceError, setWorkflowEvidenceError] = useState<string | null>(null);
 
   const {
     batches: dbBatches,
-    setBatches: setDbBatches,
     loading: approvalLoading,
     dbReady,
     persistDecision,
@@ -33,31 +46,72 @@ export function useWorkflow() {
   const [approvalBatches, setApprovalBatches] = useState(dbBatches);
 
   useEffect(() => {
-    if (!approvalLoading) {
-      setApprovalBatches(dbBatches);
-    }
+    if (!approvalLoading) setApprovalBatches(dbBatches);
   }, [approvalLoading, dbBatches]);
 
-  const advanceStage = useCallback((stageId: WorkflowStageId) => {
-    setRunStates((prev) => {
-      const idx = prev.findIndex((r) => r.stageId === stageId);
-      if (idx === -1) return prev;
-      const next = [...prev];
-      next[idx] = { ...next[idx], status: 'complete' };
-      if (idx + 1 < next.length) {
-        next[idx + 1] = { ...next[idx + 1], status: 'running' };
+  const refreshWorkflowRuns = useCallback(async () => {
+    setWorkflowEvidenceLoading(true);
+    setWorkflowEvidenceError(null);
+    try {
+      const { data, error } = await supabase
+        .from('workflow_runs')
+        .select('*')
+        .order('date', { ascending: false })
+        .order('created_at', { ascending: false })
+        .limit(200);
+
+      if (error) throw new Error(error.message);
+
+      const rows = (data || []) as DbWorkflowRun[];
+      const newestDate = rows[0]?.date || null;
+      setLatestRunDate(newestDate);
+
+      if (!newestDate) {
+        setRunStates([]);
+        setTodayRuns([]);
+        return;
       }
-      return next;
-    });
+
+      const latestRows = rows.filter((row) => row.date === newestDate);
+      const latestPerStage = new Map<WorkflowStageId, DbWorkflowRun>();
+      for (const row of latestRows) {
+        const stage = row.stage as WorkflowStageId;
+        if (DAILY_STAGE_IDS.includes(stage) && !latestPerStage.has(stage)) {
+          latestPerStage.set(stage, row);
+        }
+      }
+
+      setRunStates(
+        DAILY_STAGE_IDS.map((stageId) => ({
+          stageId,
+          status: (latestPerStage.get(stageId)?.status || 'pending') as RunStatus,
+        }))
+      );
+
+      setTodayRuns(
+        latestRows.map((row) => ({
+          id: row.id,
+          date: row.date,
+          stage: row.stage as WorkflowStageId,
+          status: row.status as RunStatus,
+          itemsProcessed: row.items_processed,
+          itemsGenerated: row.items_generated,
+          duration: row.duration,
+        }))
+      );
+    } catch (error) {
+      setWorkflowEvidenceError(error instanceof Error ? error.message : 'Could not load workflow evidence.');
+      setRunStates([]);
+      setTodayRuns([]);
+      setLatestRunDate(null);
+    } finally {
+      setWorkflowEvidenceLoading(false);
+    }
   }, []);
 
-  const resetRun = useCallback(() => {
-    setRunStates(INITIAL_RUN_STATES);
-  }, []);
-
-  const toggleFallback = useCallback(() => {
-    setFallbackActive((prev) => !prev);
-  }, []);
+  useEffect(() => {
+    void refreshWorkflowRuns();
+  }, [refreshWorkflowRuns]);
 
   const setApprovalDecision = useCallback(
     async (batchId: string, contentId: string, decision: ApprovalDecision, reviewer: string, notes: string) => {
@@ -75,8 +129,6 @@ export function useWorkflow() {
     [closeBatchPersistence, refreshBatches]
   );
 
-  const todayRuns = useMemo(() => [], []);
-
   const currentStage = useMemo(
     () => runStates.find((r) => r.status === 'running'),
     [runStates]
@@ -87,23 +139,20 @@ export function useWorkflow() {
     [runStates]
   );
 
-  const pendingApprovals = useMemo(
-    () => {
-      const openBatch = approvalBatches.find((b) => b.status === 'open');
-      return openBatch ? openBatch.items.filter((i) => i.decision === 'pending').length : 0;
-    },
-    [approvalBatches]
-  );
+  const pendingApprovals = useMemo(() => {
+    const openBatch = approvalBatches.find((b) => b.status === 'open');
+    return openBatch ? openBatch.items.filter((i) => i.decision === 'pending').length : 0;
+  }, [approvalBatches]);
 
   return {
     runStates,
     todayRuns,
+    latestRunDate,
     currentStage,
     completedCount,
-    advanceStage,
-    resetRun,
-    fallbackActive,
-    toggleFallback,
+    workflowEvidenceLoading,
+    workflowEvidenceError,
+    refreshWorkflowRuns,
     approvalBatches,
     setApprovalDecision,
     closeBatch,
