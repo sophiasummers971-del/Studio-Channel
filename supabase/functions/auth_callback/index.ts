@@ -59,13 +59,12 @@ async function fetchPinterestProfile(accessToken: string): Promise<{ name: strin
 
 async function fetchLinkedInProfile(accessToken: string): Promise<{ name: string; id: string } | null> {
   try {
-    const res = await fetch('https://api.linkedin.com/v2/me', {
+    const res = await fetch('https://api.linkedin.com/v2/userinfo', {
       headers: { Authorization: `Bearer ${accessToken}` },
     });
     if (!res.ok) return null;
     const data = await res.json();
-    const name = `${data.localizedFirstName ?? ''} ${data.localizedLastName ?? ''}`.trim();
-    return { name, id: data.id ?? '' };
+    return { name: data.name ?? '', id: data.sub ?? '' };
   } catch { return null; }
 }
 
@@ -107,6 +106,46 @@ async function exchangeCode(
     };
   }
 
+  if (config.provider === 'instagram') {
+    const body = new URLSearchParams({
+      client_id: clientId,
+      client_secret: clientSecret,
+      grant_type: 'authorization_code',
+      redirect_uri: OAUTH_CALLBACK_URL,
+      code,
+    });
+
+    const shortResponse = await fetch(config.tokenUrl, {
+      method: 'POST',
+      body,
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    });
+
+    const shortData = await shortResponse.json();
+    if (!shortResponse.ok) {
+      throw new Error(shortData?.error_message || shortData?.error_description || `Instagram token exchange failed: ${shortResponse.status}`);
+    }
+
+    const shortToken = shortData?.access_token ?? shortData?.data?.[0]?.access_token;
+    if (!shortToken) throw new Error('Instagram did not return a short-lived access token');
+
+    const longUrl = new URL('https://graph.instagram.com/access_token');
+    longUrl.searchParams.set('grant_type', 'ig_exchange_token');
+    longUrl.searchParams.set('client_secret', clientSecret);
+    longUrl.searchParams.set('access_token', shortToken);
+
+    const longResponse = await fetch(longUrl);
+    const longData = await longResponse.json();
+    if (!longResponse.ok || !longData?.access_token) {
+      throw new Error(longData?.error?.message || `Instagram long-lived token exchange failed: ${longResponse.status}`);
+    }
+
+    return {
+      access_token: longData.access_token,
+      expires_in: longData.expires_in,
+    };
+  }
+
   if (config.provider === 'linkedin') {
     const body = new URLSearchParams({
       grant_type: 'authorization_code',
@@ -131,10 +170,6 @@ async function exchangeCode(
     redirect_uri: OAUTH_CALLBACK_URL,
     grant_type: 'authorization_code',
   });
-
-  if (config.provider === 'instagram') {
-    body.delete('grant_type');
-  }
 
   const res = await fetch(config.tokenUrl, {
     method: 'POST',
