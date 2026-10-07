@@ -38,7 +38,7 @@ interface WeeklyApprovalViewProps {
 }
 
 export function WeeklyApprovalView({ workflow }: WeeklyApprovalViewProps) {
-  const { approvalBatches, setApprovalDecision, closeBatch, pendingApprovals } = workflow;
+  const { approvalBatches, setApprovalDecision, closeBatch, refreshApprovals } = workflow;
   const { batchId, weekLabel, items: weekItems, addToBatch } = useWeeklyBatch();
   const { content } = useContentData();
 
@@ -54,6 +54,21 @@ export function WeeklyApprovalView({ workflow }: WeeklyApprovalViewProps) {
   );
   const [reviewerName, setReviewerName] = useState('');
   const [checklistState, setChecklistState] = useState<Record<string, boolean>>({});
+  const [approvalError, setApprovalError] = useState<string | null>(null);
+
+  useEffect(() => {
+    void refreshApprovals().catch((error) => {
+      setApprovalError(error instanceof Error ? error.message : 'Could not refresh approvals.');
+    });
+  }, [refreshApprovals]);
+
+  useEffect(() => {
+    if (!activeBatchId || !approvalBatches.some((batch) => batch.id === activeBatchId)) {
+      setActiveBatchId(
+        approvalBatches.find((batch) => batch.status === 'open')?.id || approvalBatches[0]?.id || ''
+      );
+    }
+  }, [approvalBatches, activeBatchId]);
 
   const activeBatch = useMemo(
     () => approvalBatches.find((b) => b.id === activeBatchId) || approvalBatches[0],
@@ -72,13 +87,25 @@ export function WeeklyApprovalView({ workflow }: WeeklyApprovalViewProps) {
 
   const allChecked = REVIEW_CHECKLIST.every((c) => checklistState[c.id]);
 
-  const handleDecision = (contentId: string, decision: ApprovalDecision) => {
-    setApprovalDecision(activeBatch.id, contentId, decision, reviewerName || 'Reviewer', '');
+  const handleDecision = async (contentId: string, decision: ApprovalDecision) => {
+    setApprovalError(null);
+    try {
+      await setApprovalDecision(activeBatch.id, contentId, decision, reviewerName || 'Reviewer', '');
+    } catch (error) {
+      setApprovalError(error instanceof Error ? error.message : 'Could not save approval decision.');
+    }
   };
 
-  const handleCloseBatch = () => {
-    closeBatch(activeBatch.id);
+  const handleCloseBatch = async () => {
+    setApprovalError(null);
+    try {
+      await closeBatch(activeBatch.id);
+    } catch (error) {
+      setApprovalError(error instanceof Error ? error.message : 'Could not close approval batch.');
+    }
   };
+
+  const activePendingApprovals = activeBatch.items.filter((item) => item.decision === 'pending').length;
 
   return (
     <div className="p-8 max-w-6xl mx-auto">
@@ -89,6 +116,12 @@ export function WeeklyApprovalView({ workflow }: WeeklyApprovalViewProps) {
           Only approved content moves to scheduling and handoff.
         </p>
       </div>
+
+      {approvalError && (
+        <div className="mb-5 rounded-xl border border-rose-400/20 bg-rose-400/[0.05] px-4 py-3 text-sm text-rose-300">
+          Approval error: {approvalError}
+        </div>
+      )}
 
       {/* Batch Selector */}
       <div className="flex items-center gap-2 mb-6">
@@ -194,9 +227,9 @@ export function WeeklyApprovalView({ workflow }: WeeklyApprovalViewProps) {
             />
             <button
               onClick={handleCloseBatch}
-              disabled={!allChecked || pendingApprovals > 0}
+              disabled={!allChecked || activePendingApprovals > 0}
               className={`flex items-center gap-1.5 px-4 py-2 text-sm font-medium rounded-lg transition-all ${
-                allChecked && pendingApprovals === 0
+                allChecked && activePendingApprovals === 0
                   ? 'bg-emerald-500 text-white hover:bg-emerald-600 shadow-sm'
                   : 'bg-slate-200 text-slate-400 cursor-not-allowed'
               }`}
@@ -205,9 +238,9 @@ export function WeeklyApprovalView({ workflow }: WeeklyApprovalViewProps) {
               Close Batch
             </button>
           </div>
-          {pendingApprovals > 0 && (
+          {activePendingApprovals > 0 && (
             <p className="mt-2 text-xs text-slate-400">
-              {pendingApprovals} item(s) still need a decision before closing.
+              {activePendingApprovals} item(s) still need a decision before closing.
             </p>
           )}
         </div>
@@ -318,8 +351,14 @@ export function WeeklyApprovalView({ workflow }: WeeklyApprovalViewProps) {
             </div>
             <button
               onClick={async () => {
-                for (const item of unbatchedContent) {
-                  await addToBatch(item);
+                setApprovalError(null);
+                try {
+                  for (const item of unbatchedContent) {
+                    await addToBatch(item);
+                  }
+                  await refreshApprovals();
+                } catch (error) {
+                  setApprovalError(error instanceof Error ? error.message : 'Could not add content to approval batch.');
                 }
               }}
               className="px-3 py-1.5 text-xs font-medium text-cyan-200/75 bg-cyan-400/[0.04] border border-cyan-400/15 rounded-lg hover:bg-sky-100 transition-all"
@@ -349,7 +388,15 @@ export function WeeklyApprovalView({ workflow }: WeeklyApprovalViewProps) {
                     </p>
                   </div>
                   <button
-                    onClick={() => addToBatch(item)}
+                    onClick={async () => {
+                      setApprovalError(null);
+                      try {
+                        await addToBatch(item);
+                        await refreshApprovals();
+                      } catch (error) {
+                        setApprovalError(error instanceof Error ? error.message : 'Could not add content to approval batch.');
+                      }
+                    }}
                     className="px-3 py-1.5 text-xs font-medium text-cyan-200/75 bg-cyan-400/[0.04] border border-cyan-400/15 rounded-lg hover:bg-sky-100 transition-all shrink-0"
                   >
                     + Add
