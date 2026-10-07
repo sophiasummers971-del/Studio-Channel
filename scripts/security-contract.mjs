@@ -35,8 +35,11 @@ assert.match(authCallback, /oauth_states/,
   'auth_callback must validate OAuth state');
 assert.match(authCallback, /oauth_credentials/,
   'auth_callback must store credentials outside account_connections');
-assert.doesNotMatch(authCallback, /access_token:\s*tokenData\.access_token[\s\S]*account_connections/,
-  'auth_callback must not place OAuth credentials in account_connections');
+
+const metadataMatch = authCallback.match(/const accountMetadata = \{([\s\S]*?)\n\s*\};/);
+assert.ok(metadataMatch, 'auth_callback must define an explicit account metadata payload');
+assert.doesNotMatch(metadataMatch[1], /access_token|refresh_token|accessToken|refreshToken/,
+  'account_connections metadata payload must contain zero OAuth credential fields');
 
 assert.match(oauthConfig, /OAUTH_CALLBACK_URL/,
   'OAuth config must use one server-side callback URL');
