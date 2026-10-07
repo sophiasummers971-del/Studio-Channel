@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState } from 'react';
 import { Sidebar } from '@/components/Sidebar';
 import { TopBar } from '@/components/TopBar';
 import { ContentDetailModal } from '@/components/ContentDetailModal';
@@ -48,10 +48,6 @@ function App() {
     setSelectedItem(item);
   };
 
-  const filteredContent = useMemo(() => {
-    return searchQuery;
-  }, [searchQuery]);
-
   return (
     <div className="min-h-screen bg-slate-50 flex">
       <a href="#main-content" className="skip-link">
@@ -70,6 +66,7 @@ function App() {
           activePlatform={activePlatform}
           onSearch={setSearchQuery}
           searchQuery={searchQuery}
+          onNewContent={() => handleNavigate('content-generator')}
         />
 
         <main id="main-content" className="flex-1 overflow-y-auto">

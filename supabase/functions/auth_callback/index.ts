@@ -1,23 +1,22 @@
 // Edge Function: auth_callback
-// Receives the OAuth code from the platform redirect, exchanges it for an access token,
-// optionally fetches the user profile, stores everything in Supabase, and redirects
-// the user back to the frontend with the connection status.
+// Validates single-use OAuth state, exchanges the code server-side, stores credentials
+// in a server-only table, and returns only connection metadata to the browser.
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { corsHeaders } from "../_shared/cors.ts";
-import { getProviderConfig, REDIRECT_BASE } from "../_shared/config.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { corsHeaders } from "../_shared/cors.ts";
+import { APP_URL, getProviderConfig, OAUTH_CALLBACK_URL } from "../_shared/config.ts";
 
 interface TokenResponse {
   access_token?: string;
   expires_in?: number;
   token_type?: string;
   refresh_token?: string;
+  refresh_token_expires_in?: number;
+  refresh_token_expires_at?: number;
   error?: string;
   error_description?: string;
 }
-
-// ── Profile fetchers per platform ──
 
 async function fetchInstagramProfile(accessToken: string): Promise<{ name: string; id: string } | null> {
   try {
@@ -40,7 +39,7 @@ async function fetchFacebookProfile(accessToken: string): Promise<{ name: string
 async function fetchTikTokProfile(accessToken: string): Promise<{ name: string; id: string } | null> {
   try {
     const res = await fetch('https://open.tiktokapis.com/v2/user/info/?fields=display_name,open_id', {
-      headers: { 'Authorization': `Bearer ${accessToken}` },
+      headers: { Authorization: `Bearer ${accessToken}` },
     });
     if (!res.ok) return null;
     const data = await res.json();
@@ -52,7 +51,7 @@ async function fetchTikTokProfile(accessToken: string): Promise<{ name: string; 
 async function fetchPinterestProfile(accessToken: string): Promise<{ name: string; id: string } | null> {
   try {
     const res = await fetch('https://api.pinterest.com/v5/user_account', {
-      headers: { 'Authorization': `Bearer ${accessToken}` },
+      headers: { Authorization: `Bearer ${accessToken}` },
     });
     if (!res.ok) return null;
     const data = await res.json();
@@ -62,13 +61,12 @@ async function fetchPinterestProfile(accessToken: string): Promise<{ name: strin
 
 async function fetchLinkedInProfile(accessToken: string): Promise<{ name: string; id: string } | null> {
   try {
-    const res = await fetch('https://api.linkedin.com/v2/me', {
-      headers: { 'Authorization': `Bearer ${accessToken}` },
+    const res = await fetch('https://api.linkedin.com/v2/userinfo', {
+      headers: { Authorization: `Bearer ${accessToken}` },
     });
     if (!res.ok) return null;
     const data = await res.json();
-    const name = `${data.localizedFirstName ?? ''} ${data.localizedLastName ?? ''}`.trim();
-    return { name, id: data.id ?? '' };
+    return { name: data.name ?? '', id: data.sub ?? '' };
   } catch { return null; }
 }
 
@@ -80,32 +78,107 @@ const PROFILE_FETCHERS: Record<string, (token: string) => Promise<{ name: string
   linkedin: fetchLinkedInProfile,
 };
 
-// ── Token exchange per platform ──
-
-async function exchangeCode(config: ReturnType<typeof getProviderConfig> & {}, code: string, redirectUri: string): Promise<TokenResponse> {
+async function exchangeCode(
+  config: NonNullable<ReturnType<typeof getProviderConfig>>,
+  code: string,
+): Promise<TokenResponse> {
+  const clientId = Deno.env.get(config.clientIdEnv) ?? '';
   const clientSecret = Deno.env.get(config.clientSecretEnv);
-  if (!clientSecret) throw new Error(`Missing ${config.clientSecretEnv}`);
+  if (!clientId || !clientSecret) throw new Error(`Missing OAuth credentials for ${config.provider}`);
 
   if (config.provider === 'tiktok') {
-    const body = new URLSearchParams();
-    body.set('client_key', Deno.env.get(config.clientIdEnv) ?? '');
-    body.set('client_secret', clientSecret);
-    body.set('code', code);
-    body.set('grant_type', 'authorization_code');
-    body.set('redirect_uri', redirectUri);
-    const res = await fetch(config.tokenUrl, { method: 'POST', body, headers: { 'Content-Type': 'application/x-www-form-urlencoded' } });
+    const body = new URLSearchParams({
+      client_key: clientId,
+      client_secret: clientSecret,
+      code,
+      grant_type: 'authorization_code',
+      redirect_uri: OAUTH_CALLBACK_URL,
+    });
+    const res = await fetch(config.tokenUrl, {
+      method: 'POST',
+      body,
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    });
     if (!res.ok) throw new Error(`TikTok token exchange failed: ${res.status}`);
     const data = await res.json();
-    return { access_token: data.data?.access_token, expires_in: data.data?.expires_in, refresh_token: data.data?.refresh_token ?? undefined };
+    return {
+      access_token: data.access_token ?? data.data?.access_token,
+      expires_in: data.expires_in ?? data.data?.expires_in,
+      refresh_token: data.refresh_token ?? data.data?.refresh_token,
+    };
+  }
+
+  if (config.provider === 'instagram') {
+    const body = new URLSearchParams({
+      client_id: clientId,
+      client_secret: clientSecret,
+      grant_type: 'authorization_code',
+      redirect_uri: OAUTH_CALLBACK_URL,
+      code,
+    });
+
+    const shortResponse = await fetch(config.tokenUrl, {
+      method: 'POST',
+      body,
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    });
+
+    const shortData = await shortResponse.json();
+    if (!shortResponse.ok) {
+      throw new Error(shortData?.error_message || shortData?.error_description || `Instagram token exchange failed: ${shortResponse.status}`);
+    }
+
+    const shortToken = shortData?.access_token ?? shortData?.data?.[0]?.access_token;
+    if (!shortToken) throw new Error('Instagram did not return a short-lived access token');
+
+    const longUrl = new URL('https://graph.instagram.com/access_token');
+    longUrl.searchParams.set('grant_type', 'ig_exchange_token');
+    longUrl.searchParams.set('client_secret', clientSecret);
+    longUrl.searchParams.set('access_token', shortToken);
+
+    const longResponse = await fetch(longUrl);
+    const longData = await longResponse.json();
+    if (!longResponse.ok || !longData?.access_token) {
+      throw new Error(longData?.error?.message || `Instagram long-lived token exchange failed: ${longResponse.status}`);
+    }
+
+    return {
+      access_token: longData.access_token,
+      expires_in: longData.expires_in,
+    };
+  }
+
+  if (config.provider === 'pinterest') {
+    const body = new URLSearchParams({
+      grant_type: 'authorization_code',
+      code,
+      redirect_uri: OAUTH_CALLBACK_URL,
+    });
+
+    const res = await fetch(config.tokenUrl, {
+      method: 'POST',
+      body,
+      headers: {
+        Authorization: `Basic ${btoa(`${clientId}:${clientSecret}`)}`,
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+    });
+
+    const data: TokenResponse = await res.json();
+    if (!res.ok) {
+      throw new Error(data.error_description || data.error || `Pinterest token exchange failed: ${res.status}`);
+    }
+    return data;
   }
 
   if (config.provider === 'linkedin') {
-    const body = new URLSearchParams();
-    body.set('grant_type', 'authorization_code');
-    body.set('code', code);
-    body.set('redirect_uri', redirectUri);
-    body.set('client_id', Deno.env.get(config.clientIdEnv) ?? '');
-    body.set('client_secret', clientSecret);
+    const body = new URLSearchParams({
+      grant_type: 'authorization_code',
+      code,
+      redirect_uri: OAUTH_CALLBACK_URL,
+      client_id: clientId,
+      client_secret: clientSecret,
+    });
     const res = await fetch(config.tokenUrl, {
       method: 'POST',
       body,
@@ -115,111 +188,135 @@ async function exchangeCode(config: ReturnType<typeof getProviderConfig> & {}, c
     return await res.json();
   }
 
-  // instagram, facebook, pinterest — standard params
-  const params = new URLSearchParams({
-    client_id: Deno.env.get(config.clientIdEnv) ?? '',
+  const body = new URLSearchParams({
+    client_id: clientId,
     client_secret: clientSecret,
     code,
-    redirect_uri: redirectUri,
+    redirect_uri: OAUTH_CALLBACK_URL,
     grant_type: 'authorization_code',
   });
 
-  // instagram requires empty body to get access_token
-  if (config.provider === 'instagram') {
-    params.delete('grant_type');
-    params.delete('client_secret');
-  }
-
   const res = await fetch(config.tokenUrl, {
     method: 'POST',
-    body: params,
+    body,
     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
   });
-
   const data: TokenResponse = await res.json();
   if (!res.ok) throw new Error(data.error_description || `Token exchange failed: ${res.status}`);
   return data;
 }
 
-// ── Main handler ──
-
 serve(async (req: Request) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
 
+  let provider = 'unknown';
+
   try {
+    const supabaseUrl = Deno.env.get('SUPABASE_URL');
+    const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
+    if (!supabaseUrl || !serviceRoleKey || !OAUTH_CALLBACK_URL) {
+      throw new Error('OAuth server configuration is incomplete');
+    }
+
     const url = new URL(req.url);
-    // URL pattern: /functions/v1/auth_callback?code=xxx&state=provider_name
     const code = url.searchParams.get('code');
     const state = url.searchParams.get('state');
-    const provider = state || 'instagram'; // state carries provider name
+    const providerError = url.searchParams.get('error');
 
-    if (!code) {
-      return new Response('No code provided — authorization failed.', { status: 400 });
-    }
+    if (!state) throw new Error('Missing OAuth state');
+
+    const supabase = createClient(supabaseUrl, serviceRoleKey);
+    const { data: stateRow, error: stateError } = await supabase
+      .from('oauth_states')
+      .select('provider, expires_at, user_id')
+      .eq('state', state)
+      .maybeSingle();
+
+    if (stateError || !stateRow) throw new Error('Invalid or already-used OAuth state');
+
+    provider = stateRow.provider;
+
+    if (!stateRow.user_id) throw new Error('OAuth state is not bound to an operator');
+
+    const { data: operator, error: operatorError } = await supabase
+      .from('studio_operators')
+      .select('user_id')
+      .eq('user_id', stateRow.user_id)
+      .maybeSingle();
+
+    if (operatorError || !operator) throw new Error('OAuth operator is no longer authorized');
+
+    const expired = new Date(stateRow.expires_at).getTime() <= Date.now();
+
+    const { error: consumeError } = await supabase
+      .from('oauth_states')
+      .delete()
+      .eq('state', state);
+    if (consumeError) throw new Error('Could not consume OAuth state');
+    if (expired) throw new Error('OAuth state expired');
+
+    if (providerError) throw new Error(`Provider authorization failed: ${providerError}`);
+    if (!code) throw new Error('No authorization code provided');
 
     const config = getProviderConfig(provider);
-    if (!config) {
-      return new Response('Unknown provider.', { status: 400 });
-    }
+    if (!config) throw new Error('Unknown OAuth provider');
 
-    const redirectUri = `${REDIRECT_BASE}${config.redirectPath}`;
-    const tokenData = await exchangeCode(config, code, redirectUri);
-
+    const tokenData = await exchangeCode(config, code);
     if (!tokenData.access_token) {
-      throw new Error(tokenData.error || 'No access token in response');
+      throw new Error(tokenData.error_description || tokenData.error || 'No access token returned');
     }
 
-    // Fetch profile if a fetcher exists
     const fetcher = PROFILE_FETCHERS[provider];
     const profile = fetcher ? await fetcher(tokenData.access_token) : null;
-
-    // Store in Supabase
-    const supabase = createClient(
-      Deno.env.get('SUPABASE_URL')!,
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!,
-    );
-
     const accountName = profile?.name ?? 'Connected';
     const externalId = profile?.id ?? null;
+    const expiresAt = tokenData.expires_in
+      ? new Date(Date.now() + tokenData.expires_in * 1000).toISOString()
+      : null;
+    const refreshTokenExpiresAt = tokenData.refresh_token_expires_at
+      ? new Date(tokenData.refresh_token_expires_at * 1000).toISOString()
+      : tokenData.refresh_token_expires_in
+      ? new Date(Date.now() + tokenData.refresh_token_expires_in * 1000).toISOString()
+      : null;
 
-    const upsertPayload: Record<string, unknown> = {
+    const { error: credentialError } = await supabase
+      .from('oauth_credentials')
+      .upsert({
+        provider,
+        access_token: tokenData.access_token,
+        refresh_token: tokenData.refresh_token ?? null,
+        expires_at: expiresAt,
+        refresh_token_expires_at: refreshTokenExpiresAt,
+        external_id: externalId,
+        updated_at: new Date().toISOString(),
+      }, { onConflict: 'provider' });
+    if (credentialError) throw new Error('Could not store OAuth credentials');
+
+    const accountMetadata = {
       provider,
       label: config.provider,
       connected: true,
       verified: true,
       account_name: accountName,
-      access_token: tokenData.access_token,
-      refresh_token: tokenData.refresh_token ?? null,
-      expires_at: tokenData.expires_in
-        ? new Date(Date.now() + tokenData.expires_in * 1000).toISOString()
-        : null,
+      expires_at: expiresAt,
       external_id: externalId,
       profile_raw: profile ? JSON.stringify(profile) : null,
       updated_at: new Date().toISOString(),
     };
 
-    const { error: dbErr } = await supabase
+    const { error: metadataError } = await supabase
       .from('account_connections')
-      .upsert(upsertPayload, { onConflict: 'provider' });
+      .upsert(accountMetadata, { onConflict: 'provider' });
+    if (metadataError) throw new Error('Could not store connection metadata');
 
-    if (dbErr) console.error('DB write failed:', dbErr.message);
-
-    // Redirect back to frontend with success state
-    const appUrl = REDIRECT_BASE === 'http://localhost:5173'
-      ? `${REDIRECT_BASE}`
-      : REDIRECT_BASE;
-
-    const redirectUrl = `${appUrl}#/connected/${provider}?status=ok&name=${encodeURIComponent(accountName)}`;
-
+    const redirectUrl = `${APP_URL}#/connected/${provider}?status=ok&name=${encodeURIComponent(accountName)}`;
     return new Response(null, {
       status: 302,
       headers: { ...corsHeaders, Location: redirectUrl },
     });
-
   } catch (err) {
     console.error('auth_callback error:', err);
-    const provider = new URL(req.url).searchParams.get('state') ?? 'unknown';
-    const errorRedirect = `${REDIRECT_BASE}#/connected/${provider}?status=error&error=${encodeURIComponent(String(err))}`;
+    const errorRedirect = `${APP_URL}#/connected/${provider}?status=error&error=authorization_failed`;
     return new Response(null, {
       status: 302,
       headers: { ...corsHeaders, Location: errorRedirect },

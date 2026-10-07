@@ -1,0 +1,33 @@
+name: Studio security foundation CI
+
+on:
+  push:
+    branches:
+      - codex/studio-security-foundation
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - name: Security contract
+        run: node scripts/security-contract.mjs
+      - name: UX contract
+        run: node scripts/ux-contract.mjs
+      - name: Typecheck
+        run: npm run typecheck
+      - name: Build
+        env:
+          VITE_SUPABASE_URL: https://example.supabase.co
+          VITE_SUPABASE_ANON_KEY: test-anon-key
+          VITE_APP_PASSWORD: test-only
+        run: npm run build

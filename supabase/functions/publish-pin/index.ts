@@ -1,9 +1,8 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { corsHeaders } from "../_shared/cors.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-
-const SUPABASE_URL = Deno.env.get("SUPABASE_URL") ?? "";
-const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
+import { operatorErrorResponse, requireOperator } from "../_shared/requireOperator.ts";
+import { getPinterestAccessToken } from "../_shared/pinterestCredentials.ts";
 
 interface PublishRequest {
   jobId: string;
@@ -19,18 +18,6 @@ interface PublishRequest {
 }
 
 // ── Pinterest API helpers ──
-
-async function getPinterestAccessToken(supabase: ReturnType<typeof createClient>, provider: string): Promise<string | null> {
-  const { data, error } = await supabase
-    .from("account_connections")
-    .select("access_token")
-    .eq("provider", provider)
-    .eq("connected", true)
-    .single();
-
-  if (error || !data?.access_token) return null;
-  return data.access_token;
-}
 
 async function listPinterestBoards(accessToken: string): Promise<{ id: string; name: string }[]> {
   const resp = await fetch("https://api.pinterest.com/v5/boards?page_size=25", {
@@ -113,6 +100,7 @@ serve(async (req: Request) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
 
   try {
+    const { admin: supabase } = await requireOperator(req);
     const body: PublishRequest = await req.json();
     const { jobId, contentId, platform, pinTitle, pinDescription, boardName, caption, hashtags, imageUrl, link } = body;
 
@@ -122,8 +110,6 @@ serve(async (req: Request) => {
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
-
-    const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
     // Mark job as publishing
     await supabase
@@ -143,7 +129,7 @@ serve(async (req: Request) => {
     }
 
     // Get Pinterest access token
-    const accessToken = await getPinterestAccessToken(supabase, "pinterest");
+    const accessToken = await getPinterestAccessToken(supabase);
     if (!accessToken) {
       await supabase
         .from("publish_jobs")
@@ -169,7 +155,7 @@ serve(async (req: Request) => {
     }
 
     // Build pin title and description
-    const title = pinTitle || title || "Untitled Pin";
+    const title = pinTitle || "Untitled Pin";
     const description = pinDescription || caption || "";
     const fullDescription = hashtags?.length
       ? `${description}\n\n${hashtags.map((t) => t.startsWith("#") ? t : `#${t}`).join(" ")}`
@@ -211,6 +197,9 @@ serve(async (req: Request) => {
       { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   } catch (err) {
+    const authResponse = operatorErrorResponse(err, corsHeaders);
+    if (authResponse) return authResponse;
+
     console.error("publish-pin error:", err);
     return new Response(
       JSON.stringify({ error: "Internal error" }),

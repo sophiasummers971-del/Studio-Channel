@@ -66,9 +66,6 @@ function mapPublishJob(row: DbPublishRow): PublishJob {
   };
 }
 
-const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL as string;
-const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY as string;
-
 export function usePublishPipeline() {
   const [scheduled, setScheduled] = useState<ScheduledContent[]>([]);
   const [publishJobs, setPublishJobs] = useState<PublishJob[]>([]);
@@ -159,13 +156,8 @@ export function usePublishPipeline() {
 
       try {
         const output = item.output || {};
-        const resp = await fetch(`${SUPABASE_URL}/functions/v1/publish-pin`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
-          },
-          body: JSON.stringify({
+        const { data, error } = await supabase.functions.invoke('publish-pin', {
+          body: {
             jobId: job.id,
             contentId: item.id,
             platform: item.platform,
@@ -176,12 +168,15 @@ export function usePublishPipeline() {
             hashtags: output.hashtags || [],
             imageUrl: output.thumbnailConcept || undefined,
             link: undefined,
-          }),
+          },
         });
 
-        const data = await resp.json();
+        if (error) {
+          await loadData();
+          return { ok: false, error: error.message };
+        }
 
-        if (data.error) {
+        if (data?.error) {
           // Refresh job status from DB
           await loadData();
           return { ok: false, error: data.error };

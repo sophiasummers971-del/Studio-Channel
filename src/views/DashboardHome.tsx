@@ -1,7 +1,16 @@
-import { PLATFORMS, CONTENT_STAGES, getFormat } from '@/data/platforms';
-import { MOCK_CONTENT } from '@/data/mockContent';
+import { PLATFORMS, CONTENT_STAGES } from '@/data/platforms';
+import { useAccountConnections } from '@/hooks/useAccountConnections';
+import { useContentData } from '@/hooks/useContentData';
 import type { PlatformId, ViewId } from '@/types';
-import { ArrowRight, LayoutDashboard } from 'lucide-react';
+import {
+  ArrowRight,
+  Cable,
+  CheckCircle2,
+  Circle,
+  LayoutDashboard,
+  Rocket,
+  WandSparkles,
+} from 'lucide-react';
 
 interface DashboardHomeProps {
   onPlatformSelect: (platformId: PlatformId) => void;
@@ -9,63 +18,123 @@ interface DashboardHomeProps {
 }
 
 export function DashboardHome({ onPlatformSelect, onNavigate }: DashboardHomeProps) {
+  const { content, loading: contentLoading, dbLive } = useContentData();
+  const { connections, loaded: connectionsLoaded } = useAccountConnections();
+
+  const connectedCount = PLATFORMS.filter((platform) => connections[platform.id]?.connected).length;
+  const pendingApproval = content.filter((item) => item.stage === 'review').length;
+  const readyToPublish = content.filter((item) => item.stage === 'scheduled').length;
+  const published = content.filter((item) => item.stage === 'published').length;
+
+  const stats = [
+    { label: 'Connected accounts', value: connectionsLoaded ? `${connectedCount}/${PLATFORMS.length}` : '…', icon: Cable },
+    { label: 'Waiting approval', value: contentLoading ? '…' : String(pendingApproval), icon: CheckCircle2 },
+    { label: 'Ready to publish', value: contentLoading ? '…' : String(readyToPublish), icon: Rocket },
+    { label: 'Published', value: contentLoading ? '…' : String(published), icon: LayoutDashboard },
+  ];
+
   return (
-    <div className="p-8 max-w-6xl mx-auto">
-      <div className="mb-6">
-        <div className="flex items-center gap-2 mb-1">
-          <LayoutDashboard size={18} className="text-sky-500" />
-          <h2 className="text-2xl font-bold text-slate-900">Dashboard</h2>
+    <div className="p-8 max-w-7xl mx-auto">
+      <div className="flex flex-col gap-2 mb-8">
+        <div className="flex items-center gap-2">
+          <LayoutDashboard size={19} className="text-sky-500" />
+          <h2 className="text-2xl font-bold text-slate-900">Home</h2>
         </div>
         <p className="text-sm text-slate-500">
-          Overview of all channels, content pipeline, and workflow status
+          One view of what needs attention now. Detailed engineering controls live under System.
         </p>
       </div>
 
-      <div className="mb-8">
-        <h3 className="text-lg font-semibold text-slate-900 mb-4">Channels</h3>
-        <div className="grid grid-cols-2 gap-4">
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4 mb-8">
+        {stats.map(({ label, value, icon: Icon }) => (
+          <div key={label} className="bg-white border border-slate-200 rounded-xl p-5">
+            <div className="flex items-center justify-between">
+              <p className="text-xs font-medium text-slate-500">{label}</p>
+              <Icon size={17} className="text-slate-400" />
+            </div>
+            <p className="mt-3 text-2xl font-bold text-slate-900">{value}</p>
+          </div>
+        ))}
+      </div>
+
+      <div className="grid gap-4 md:grid-cols-3 mb-8">
+        <button
+          onClick={() => onNavigate('content-generator')}
+          className="text-left bg-slate-900 text-white rounded-xl p-5 hover:bg-slate-800 transition-colors"
+        >
+          <WandSparkles size={20} className="text-sky-300 mb-4" />
+          <h3 className="font-semibold">Create content</h3>
+          <p className="text-xs text-slate-300 mt-1">Generate platform-ready drafts and move them into the workflow.</p>
+        </button>
+
+        <button
+          onClick={() => onNavigate('approval')}
+          className="text-left bg-white border border-slate-200 rounded-xl p-5 hover:border-slate-300 hover:shadow-sm transition-all"
+        >
+          <CheckCircle2 size={20} className="text-emerald-500 mb-4" />
+          <h3 className="font-semibold text-slate-900">Review approvals</h3>
+          <p className="text-xs text-slate-500 mt-1">{pendingApproval} item{pendingApproval === 1 ? '' : 's'} currently waiting for review.</p>
+        </button>
+
+        <button
+          onClick={() => onNavigate('publish-handoff')}
+          className="text-left bg-white border border-slate-200 rounded-xl p-5 hover:border-slate-300 hover:shadow-sm transition-all"
+        >
+          <Rocket size={20} className="text-violet-500 mb-4" />
+          <h3 className="font-semibold text-slate-900">Publish queue</h3>
+          <p className="text-xs text-slate-500 mt-1">{readyToPublish} item{readyToPublish === 1 ? '' : 's'} ready for publishing.</p>
+        </button>
+      </div>
+
+      <div className="bg-white border border-slate-200 rounded-xl overflow-hidden mb-8">
+        <div className="px-5 py-4 border-b border-slate-100 flex items-center justify-between">
+          <div>
+            <h3 className="font-semibold text-slate-900">Accounts</h3>
+            <p className="text-xs text-slate-500 mt-1">Provider status only. Credentials remain server-side.</p>
+          </div>
+          <button
+            onClick={() => onNavigate('connections')}
+            className="text-xs font-semibold text-sky-600 hover:text-sky-700"
+          >
+            Manage accounts
+          </button>
+        </div>
+
+        <div className="divide-y divide-slate-100">
           {PLATFORMS.map((platform) => {
-            const platformContent = MOCK_CONTENT.filter((c) => c.platform === platform.id);
-            const platformPublished = platformContent.filter((c) => c.stage === 'published').length;
+            const connection = connections[platform.id];
+            const connected = !!connection?.connected;
             return (
               <button
                 key={platform.id}
                 onClick={() => onPlatformSelect(platform.id)}
-                className="group text-left bg-white border border-slate-200 rounded-xl p-5 hover:shadow-md hover:border-slate-300 transition-all"
+                className="w-full flex items-center gap-4 px-5 py-3.5 text-left hover:bg-slate-50 transition-colors"
               >
-                <div className="flex items-center justify-between mb-3">
-                  <div className="flex items-center gap-3">
-                    <span
-                      className="w-10 h-10 rounded-xl flex items-center justify-center text-sm font-bold"
-                      style={{ backgroundColor: `${platform.color}18`, color: platform.color }}
-                    >
-                      {platform.label[0]}
-                    </span>
-                    <div>
-                      <h4 className="font-semibold text-slate-900 text-sm">{platform.label}</h4>
-                      <p className="text-xs text-slate-400">{platformContent.length} items</p>
-                    </div>
-                  </div>
-                  <ArrowRight size={18} className="text-slate-300 group-hover:text-sky-500 group-hover:translate-x-1 transition-all" />
+                <span
+                  className="w-9 h-9 rounded-lg flex items-center justify-center text-xs font-bold"
+                  style={{ backgroundColor: `${platform.color}18`, color: platform.color }}
+                >
+                  {platform.label[0]}
+                </span>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-slate-900">{platform.label}</p>
+                  <p className="text-xs text-slate-500 truncate">
+                    {connected ? connection.accountName || 'Connected' : 'Not connected'}
+                  </p>
                 </div>
-
-                <p className="text-xs text-slate-500 mb-3 leading-relaxed">{platform.description}</p>
-                <div className="flex items-center gap-2 flex-wrap">
-                  {platform.formats.map((fmtId) => {
-                    const fmt = getFormat(fmtId);
-                    return fmt ? (
-                      <span
-                        key={fmtId}
-                        className="text-[10px] font-medium px-2 py-1 rounded-md bg-slate-100 text-slate-600"
-                      >
-                        {fmt.label}
-                      </span>
-                    ) : null;
-                  })}
-                </div>
-                <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
-                  <span className="text-slate-400">{platformPublished} published</span>
-                  <span className="text-slate-400">{platformContent.length - platformPublished} in progress</span>
+                <div className="flex items-center gap-2 text-xs">
+                  {connected ? (
+                    <>
+                      <CheckCircle2 size={15} className="text-emerald-500" />
+                      <span className="text-emerald-600">Connected</span>
+                    </>
+                  ) : (
+                    <>
+                      <Circle size={15} className="text-slate-300" />
+                      <span className="text-slate-400">Offline</span>
+                    </>
+                  )}
+                  <ArrowRight size={15} className="text-slate-300 ml-2" />
                 </div>
               </button>
             );
@@ -73,30 +142,42 @@ export function DashboardHome({ onPlatformSelect, onNavigate }: DashboardHomePro
         </div>
       </div>
 
-      <div>
-        <h3 className="text-lg font-semibold text-slate-900 mb-4">Pipeline Overview</h3>
-        <div className="bg-white border border-slate-200 rounded-xl p-5">
-          <div className="flex items-center gap-2">
-            {CONTENT_STAGES.map((stage, i) => {
-              const count = MOCK_CONTENT.filter((c) => c.stage === stage.id).length;
-              return (
-                <div key={stage.id} className="flex items-center flex-1">
-                  <div className="flex-1 text-center">
-                    <div
-                      className="w-12 h-12 mx-auto rounded-full flex items-center justify-center text-sm font-bold mb-2"
-                      style={{ backgroundColor: `${stage.color}15`, color: stage.color }}
-                    >
-                      {count}
-                    </div>
-                    <p className="text-xs font-medium text-slate-600">{stage.label}</p>
-                  </div>
-                  {i < CONTENT_STAGES.length - 1 && (
-                    <div className="h-0.5 flex-1 bg-slate-200 -mt-6" />
-                  )}
-                </div>
-              );
-            })}
+      <div className="bg-white border border-slate-200 rounded-xl p-5">
+        <div className="flex items-center justify-between mb-5">
+          <div>
+            <h3 className="font-semibold text-slate-900">Content flow</h3>
+            <p className="text-xs text-slate-500 mt-1">
+              {dbLive ? 'Live Supabase data' : 'No live content rows loaded yet'}
+            </p>
           </div>
+          <button
+            onClick={() => onNavigate('pipeline')}
+            className="text-xs font-semibold text-sky-600 hover:text-sky-700"
+          >
+            Open pipeline
+          </button>
+        </div>
+
+        <div className="flex items-center gap-2">
+          {CONTENT_STAGES.map((stage, index) => {
+            const count = content.filter((item) => item.stage === stage.id).length;
+            return (
+              <div key={stage.id} className="flex items-center flex-1 min-w-0">
+                <div className="flex-1 text-center min-w-0">
+                  <div
+                    className="w-12 h-12 mx-auto rounded-full flex items-center justify-center text-sm font-bold mb-2"
+                    style={{ backgroundColor: `${stage.color}15`, color: stage.color }}
+                  >
+                    {contentLoading ? '…' : count}
+                  </div>
+                  <p className="text-xs font-medium text-slate-600 truncate">{stage.label}</p>
+                </div>
+                {index < CONTENT_STAGES.length - 1 && (
+                  <div className="h-0.5 flex-1 bg-slate-200 -mt-6" />
+                )}
+              </div>
+            );
+          })}
         </div>
       </div>
     </div>
