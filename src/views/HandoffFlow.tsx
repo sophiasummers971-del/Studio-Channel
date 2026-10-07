@@ -37,7 +37,7 @@ export function HandoffFlow({ onItemClick }: HandoffFlowProps) {
   return (
     <div className="p-8 max-w-6xl mx-auto">
       <div className="mb-6">
-        <h2 className="text-2xl font-bold text-slate-900 mb-1">Handoff Flow</h2>
+        <h2 className="text-2xl font-bold text-slate-100 mb-1">Handoff Flow</h2>
         <p className="text-sm text-slate-500">
           How content moves between sections — from input through processing to output
         </p>
@@ -48,14 +48,14 @@ export function HandoffFlow({ onItemClick }: HandoffFlowProps) {
           const Icon = step.icon;
           return (
             <div key={i} className="relative">
-              <div className="bg-white border border-slate-200 rounded-xl p-5 h-full">
+              <div className="bg-[#0b1118] border border-[#1b2935] rounded-xl p-5 h-full">
                 <div
                   className="w-12 h-12 rounded-xl flex items-center justify-center mb-4"
                   style={{ backgroundColor: `${step.color}12` }}
                 >
                   <Icon size={24} style={{ color: step.color }} />
                 </div>
-                <h3 className="text-sm font-semibold text-slate-800 mb-2">{step.title}</h3>
+                <h3 className="text-sm font-semibold text-slate-200 mb-2">{step.title}</h3>
                 <p className="text-xs text-slate-500 leading-relaxed mb-3">{step.description}</p>
                 <div className="flex items-center gap-1.5 text-xs text-slate-400">
                   <span className="font-medium">{step.items.length}</span> items in this step
@@ -63,7 +63,7 @@ export function HandoffFlow({ onItemClick }: HandoffFlowProps) {
               </div>
               {i < flowSteps.length - 1 && (
                 <div className="absolute top-1/2 -right-3 -translate-y-1/2 z-10">
-                  <div className="w-6 h-6 rounded-full bg-white border border-slate-200 flex items-center justify-center shadow-sm">
+                  <div className="w-6 h-6 rounded-full bg-[#0b1118] border border-[#1b2935] flex items-center justify-center shadow-sm">
                     <ArrowRight size={12} className="text-slate-400" />
                   </div>
                 </div>
@@ -73,8 +73,8 @@ export function HandoffFlow({ onItemClick }: HandoffFlowProps) {
         })}
       </div>
 
-      <div className="bg-white border border-slate-200 rounded-xl p-5 mb-6">
-        <h3 className="text-sm font-semibold text-slate-700 mb-4">Stage Progression</h3>
+      <div className="bg-[#0b1118] border border-[#1b2935] rounded-xl p-5 mb-6">
+        <h3 className="text-sm font-semibold text-slate-300 mb-4">Stage Progression</h3>
         <div className="flex items-center gap-2">
           {STAGE_ORDER.map((stageId, i) => {
             const stage = CONTENT_STAGES.find((s) => s.id === stageId)!;
@@ -88,7 +88,7 @@ export function HandoffFlow({ onItemClick }: HandoffFlowProps) {
                   >
                     {count}
                   </div>
-                  <p className="text-[10px] font-medium text-slate-600">{stage.label}</p>
+                  <p className="text-[10px] font-medium text-slate-400">{stage.label}</p>
                 </div>
                 {i < STAGE_ORDER.length - 1 && (
                   <ArrowRight size={14} className="text-slate-300 -mt-5" />
@@ -100,7 +100,7 @@ export function HandoffFlow({ onItemClick }: HandoffFlowProps) {
       </div>
 
       <div>
-        <h3 className="text-sm font-semibold text-slate-700 mb-3">All Content in Flow</h3>
+        <h3 className="text-sm font-semibold text-slate-300 mb-3">All Content in Flow</h3>
         <div className="space-y-2">
           {MOCK_CONTENT.map((item) => {
             const platform = getPlatform(item.platform);
@@ -111,7 +111,7 @@ export function HandoffFlow({ onItemClick }: HandoffFlowProps) {
               <button
                 key={item.id}
                 onClick={() => onItemClick(item)}
-                className="group w-full flex items-center gap-3 bg-white border border-slate-200 rounded-lg px-4 py-3 hover:shadow-md hover:border-slate-300 transition-all text-left"
+                className="group w-full flex items-center gap-3 bg-[#0b1118] border border-[#1b2935] rounded-lg px-4 py-3 hover:shadow-md hover:border-slate-300 transition-all text-left"
               >
                 <span
                   className="w-7 h-7 rounded-lg flex items-center justify-center text-[10px] font-bold shrink-0"
@@ -120,7 +120,7 @@ export function HandoffFlow({ onItemClick }: HandoffFlowProps) {
                   {platform.label[0]}
                 </span>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-slate-800 truncate group-hover:text-sky-600 transition-colors">
+                  <p className="text-sm font-medium text-slate-200 truncate group-hover:text-sky-600 transition-colors">
                     {item.title}
                   </p>
                   <p className="text-xs text-slate-400">
