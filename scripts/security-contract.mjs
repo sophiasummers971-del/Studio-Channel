@@ -9,6 +9,7 @@ const passwordGate = read('src/components/PasswordGate.tsx');
 const authStart = read('supabase/functions/auth_start/index.ts');
 const authCallback = read('supabase/functions/auth_callback/index.ts');
 const oauthConfig = read('supabase/functions/_shared/config.ts');
+const main = read('src/main.tsx');
 
 assert.ok(
   existsSync('supabase/migrations/20261007090000_secure_oauth_credentials.sql'),
@@ -45,5 +46,24 @@ assert.match(oauthConfig, /OAUTH_CALLBACK_URL/,
   'OAuth config must use one server-side callback URL');
 assert.match(oauthConfig, /boards:write/,
   'Pinterest OAuth scopes must include boards:write because publish-pin can create boards');
+
+assert.ok(
+  existsSync('supabase/migrations/20261007093000_owner_auth_rls.sql'),
+  'owner-auth RLS migration must exist'
+);
+assert.ok(
+  existsSync('src/components/AuthGate.tsx'),
+  'Supabase AuthGate must exist'
+);
+
+const authGate = existsSync('src/components/AuthGate.tsx') ? read('src/components/AuthGate.tsx') : '';
+assert.match(authGate, /signInWithOtp/,
+  'AuthGate must use Supabase email OTP or magic-link authentication');
+assert.match(authGate, /studio_operators/,
+  'AuthGate must verify explicit Studio operator membership');
+assert.match(main, /AuthGate/,
+  'main entrypoint must use AuthGate');
+assert.doesNotMatch(main, /PasswordGate/,
+  'client-side password gate must not be the production trust boundary');
 
 console.log('security contract: PASS');
