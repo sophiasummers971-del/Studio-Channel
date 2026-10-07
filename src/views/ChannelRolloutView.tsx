@@ -61,7 +61,7 @@ export function ChannelRolloutView() {
     <div className="p-8 max-w-6xl mx-auto">
       {/* Header */}
       <div className="mb-6">
-        <h2 className="text-2xl font-bold text-slate-900 mb-1">Channel Rollout</h2>
+        <h2 className="text-2xl font-bold text-slate-100 mb-1">Channel Rollout</h2>
         <p className="text-sm text-slate-500">
           A gated, phased path from the deployed universal baseline into channel-specific setups.
           Each channel is added one at a time, only after the previous step passes its checks.
@@ -72,8 +72,8 @@ export function ChannelRolloutView() {
       <div
         className={`rounded-xl border p-5 mb-6 transition-all ${
           isFullyRolledOut
-            ? 'bg-emerald-50 border-emerald-300'
-            : 'bg-sky-50 border-sky-200'
+            ? 'bg-emerald-400/[0.045] border-emerald-300'
+            : 'bg-cyan-400/[0.04] border-cyan-400/15'
         }`}
       >
         <div className="flex items-center gap-4">
@@ -83,7 +83,7 @@ export function ChannelRolloutView() {
             }`}
           >
             {isFullyRolledOut ? (
-              <ShieldCheck size={24} className="text-emerald-600" />
+              <ShieldCheck size={24} className="text-emerald-400" />
             ) : (
               <TrendingUp size={24} className="text-sky-600" />
             )}
@@ -100,7 +100,7 @@ export function ChannelRolloutView() {
             </h3>
             <p
               className={`text-xs mt-0.5 ${
-                isFullyRolledOut ? 'text-emerald-600' : 'text-sky-600'
+                isFullyRolledOut ? 'text-emerald-400' : 'text-sky-600'
               }`}
             >
               {isFullyRolledOut
@@ -110,7 +110,7 @@ export function ChannelRolloutView() {
           </div>
           <button
             onClick={resetAll}
-            className="flex items-center gap-1.5 px-3 py-2 text-xs font-medium text-slate-600 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors"
+            className="flex items-center gap-1.5 px-3 py-2 text-xs font-medium text-slate-400 bg-[#0b1118] border border-[#1b2935] rounded-lg hover:bg-[#070b10] transition-colors"
           >
             <RotateCcw size={13} />
             Reset All
@@ -120,12 +120,12 @@ export function ChannelRolloutView() {
 
 
       {/* Working Rule Callout */}
-      <div className="mb-8 p-4 bg-amber-50 border border-amber-100 rounded-xl">
+      <div className="mb-8 p-4 bg-amber-400/[0.05] border border-amber-400/10 rounded-xl">
         <div className="flex items-start gap-3">
           <Flag size={16} className="text-amber-600 mt-0.5 shrink-0" />
           <div>
-            <h4 className="text-sm font-semibold text-amber-800">Working Rule</h4>
-            <p className="text-xs text-amber-700 mt-1 leading-relaxed">
+            <h4 className="text-sm font-semibold text-amber-200/80">Working Rule</h4>
+            <p className="text-xs text-amber-200/75 mt-1 leading-relaxed">
               Roll out only at a pace that keeps the system smooth and manageable. Prefer steady expansion
               over fast expansion. Stop and simplify if a new channel introduces unnecessary pressure.
             </p>
@@ -148,7 +148,7 @@ export function ChannelRolloutView() {
           return (
             <div
               key={step.id}
-              className="bg-white border border-slate-200 rounded-xl overflow-hidden transition-all hover:shadow-sm"
+              className="bg-[#0b1118] border border-[#1b2935] rounded-xl overflow-hidden transition-all hover:shadow-sm"
             >
               {/* Step Header */}
               <button
@@ -163,7 +163,7 @@ export function ChannelRolloutView() {
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
-                    <span className="text-sm font-semibold text-slate-800">{step.label}</span>
+                    <span className="text-sm font-semibold text-slate-200">{step.label}</span>
                     {platform && !isPhase && (
                       <span
                         className="text-[10px] font-medium px-2 py-0.5 rounded-md"
@@ -173,7 +173,7 @@ export function ChannelRolloutView() {
                       </span>
                     )}
                     {!isPhase && (
-                      <span className="text-[10px] font-medium px-2 py-0.5 rounded-md bg-violet-100 text-violet-700">
+                      <span className="text-[10px] font-medium px-2 py-0.5 rounded-md bg-violet-100 text-violet-300">
                         Channel Step
                       </span>
                     )}
@@ -191,7 +191,7 @@ export function ChannelRolloutView() {
 
               {/* Expanded Content */}
               {expanded && (
-                <div className="px-5 pb-5 border-t border-slate-100">
+                <div className="px-5 pb-5 border-t border-[#14202a]">
                   {/* Entry Criteria */}
                   {step.entryCriteria.length > 0 && (
                     <div className="mt-4">
@@ -208,13 +208,13 @@ export function ChannelRolloutView() {
                               onClick={() => toggleEntryCriterion(step.id, criterion.id)}
                               className={`w-full flex items-start gap-3 px-3 py-2.5 rounded-lg text-left transition-all ${
                                 met
-                                  ? 'bg-emerald-50/50 border border-emerald-100'
-                                  : 'bg-slate-50 border border-slate-100 hover:bg-slate-100'
+                                  ? 'bg-emerald-400/[0.045]/50 border border-emerald-400/10'
+                                  : 'bg-[#070b10] border border-[#14202a] hover:bg-[#101820]'
                               }`}
                             >
                               <div
                                 className={`w-5 h-5 rounded-md flex items-center justify-center shrink-0 mt-0.5 transition-all ${
-                                  met ? 'bg-emerald-500' : 'bg-white border border-slate-300'
+                                  met ? 'bg-emerald-400/[0.045]0' : 'bg-[#0b1118] border border-slate-300'
                                 }`}
                               >
                                 {met ? (
@@ -226,7 +226,7 @@ export function ChannelRolloutView() {
                               <div className="flex-1">
                                 <p
                                   className={`text-sm font-medium ${
-                                    met ? 'text-slate-700' : 'text-slate-600'
+                                    met ? 'text-slate-300' : 'text-slate-400'
                                   }`}
                                 >
                                   {criterion.label}
@@ -258,13 +258,13 @@ export function ChannelRolloutView() {
                               onClick={() => toggleCheckpoint(step.id, cp.id)}
                               className={`w-full flex items-start gap-3 px-3 py-2.5 rounded-lg text-left transition-all ${
                                 passed
-                                  ? 'bg-emerald-50/50 border border-emerald-100'
-                                  : 'bg-slate-50 border border-slate-100 hover:bg-slate-100'
+                                  ? 'bg-emerald-400/[0.045]/50 border border-emerald-400/10'
+                                  : 'bg-[#070b10] border border-[#14202a] hover:bg-[#101820]'
                               }`}
                             >
                               <div
                                 className={`w-5 h-5 rounded-md flex items-center justify-center shrink-0 mt-0.5 transition-all ${
-                                  passed ? 'bg-emerald-500' : 'bg-white border border-slate-300'
+                                  passed ? 'bg-emerald-400/[0.045]0' : 'bg-[#0b1118] border border-slate-300'
                                 }`}
                               >
                                 {passed ? (
@@ -274,7 +274,7 @@ export function ChannelRolloutView() {
                                 )}
                               </div>
                               <div className="flex-1">
-                                <p className={`text-sm font-medium ${passed ? 'text-slate-700' : 'text-slate-600'}`}>
+                                <p className={`text-sm font-medium ${passed ? 'text-slate-300' : 'text-slate-400'}`}>
                                   {cp.label}
                                 </p>
                                 <p className="text-xs text-slate-500 mt-0.5 leading-relaxed">
@@ -290,11 +290,11 @@ export function ChannelRolloutView() {
 
 
                     {/* Action Buttons */}
-                    <div className="mt-4 pt-3 border-t border-slate-100 flex items-center gap-2">
+                    <div className="mt-4 pt-3 border-t border-[#14202a] flex items-center gap-2">
                       {step.status === 'locked' && canAct && (
                         <button
                           onClick={() => activateStep(step.id)}
-                          className="flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-white bg-sky-500 rounded-lg hover:bg-sky-600 transition-colors shadow-sm"
+                          className="flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-white bg-cyan-400/[0.04]0 rounded-lg hover:bg-sky-600 transition-colors shadow-sm"
                         >
                           <Rocket size={15} />
                           {isPhase ? 'Confirm & Proceed' : 'Activate Channel'}
@@ -313,7 +313,7 @@ export function ChannelRolloutView() {
                       {step.status === 'in-progress' && canComp && (
                         <button
                           onClick={() => completeStep(step.id)}
-                          className="flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-white bg-emerald-500 rounded-lg hover:bg-emerald-600 transition-colors shadow-sm"
+                          className="flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-white bg-emerald-400/[0.045]0 rounded-lg hover:bg-emerald-600 transition-colors shadow-sm"
                         >
                           <CheckCircle2 size={15} />
                           Complete & Pass
@@ -328,7 +328,7 @@ export function ChannelRolloutView() {
                       {step.status === 'passed' && (
                         <button
                           onClick={() => resetStep(step.id)}
-                          className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-slate-600 bg-slate-100 rounded-lg hover:bg-slate-200 transition-colors"
+                          className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-slate-400 bg-[#101820] rounded-lg hover:bg-slate-200 transition-colors"
                         >
                           <RotateCcw size={12} />
                           Reset Step
@@ -346,9 +346,9 @@ export function ChannelRolloutView() {
       <div className="mb-8">
         <div className="flex items-center gap-2 mb-4">
           <GitBranch size={16} className="text-slate-400" />
-          <h3 className="text-sm font-semibold text-slate-700">Dependency Map</h3>
+          <h3 className="text-sm font-semibold text-slate-300">Dependency Map</h3>
         </div>
-        <div className="bg-white border border-slate-200 rounded-xl p-5">
+        <div className="bg-[#0b1118] border border-[#1b2935] rounded-xl p-5">
           <div className="space-y-2">
             {ROLLOUT_DEPENDENCIES.map((dep) => {
               const fromStep = steps.find((s) => s.id === dep.from);
@@ -358,15 +358,15 @@ export function ChannelRolloutView() {
               return (
                 <div
                   key={dep.id}
-                  className="flex items-center gap-3 px-3 py-2.5 bg-slate-50 rounded-lg"
+                  className="flex items-center gap-3 px-3 py-2.5 bg-[#070b10] rounded-lg"
                 >
-                  <span className="text-xs font-medium text-slate-600">{fromStep.label}</span>
+                  <span className="text-xs font-medium text-slate-400">{fromStep.label}</span>
                   <ArrowRight size={12} className={`${fromPassed ? 'text-emerald-400' : 'text-slate-300'}`} />
-                  <span className="text-xs font-medium text-slate-600">{toStep.label}</span>
+                  <span className="text-xs font-medium text-slate-400">{toStep.label}</span>
                   <span className={`ml-auto text-[10px] px-2 py-0.5 rounded-full font-medium ${
                     dep.type === 'blocking' ? 'bg-red-100 text-red-700' :
-                    dep.type === 'conditional' ? 'bg-amber-100 text-amber-700' :
-                    'bg-slate-100 text-slate-500'
+                    dep.type === 'conditional' ? 'bg-amber-100 text-amber-200/75' :
+                    'bg-[#101820] text-slate-500'
                   }`}>
                     {dep.type}
                   </span>
