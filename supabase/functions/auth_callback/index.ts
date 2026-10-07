@@ -168,13 +168,24 @@ serve(async (req: Request) => {
     const supabase = createClient(supabaseUrl, serviceRoleKey);
     const { data: stateRow, error: stateError } = await supabase
       .from('oauth_states')
-      .select('provider, expires_at')
+      .select('provider, expires_at, user_id')
       .eq('state', state)
       .maybeSingle();
 
     if (stateError || !stateRow) throw new Error('Invalid or already-used OAuth state');
 
     provider = stateRow.provider;
+
+    if (!stateRow.user_id) throw new Error('OAuth state is not bound to an operator');
+
+    const { data: operator, error: operatorError } = await supabase
+      .from('studio_operators')
+      .select('user_id')
+      .eq('user_id', stateRow.user_id)
+      .maybeSingle();
+
+    if (operatorError || !operator) throw new Error('OAuth operator is no longer authorized');
+
     const expired = new Date(stateRow.expires_at).getTime() <= Date.now();
 
     const { error: consumeError } = await supabase
@@ -239,7 +250,7 @@ serve(async (req: Request) => {
     });
   } catch (err) {
     console.error('auth_callback error:', err);
-    const errorRedirect = `${APP_URL}#/connected/${provider}?status=error&error=${encodeURIComponent(String(err))}`;
+    const errorRedirect = `${APP_URL}#/connected/${provider}?status=error&error=authorization_failed`;
     return new Response(null, {
       status: 302,
       headers: { ...corsHeaders, Location: errorRedirect },
