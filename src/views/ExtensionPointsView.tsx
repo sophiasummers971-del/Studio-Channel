@@ -195,15 +195,15 @@ export function ExtensionPointsView() {
         <div className="flex items-center gap-4">
           <div className="flex-1 space-y-1.5">
             <div className="flex items-center gap-2 text-xs text-slate-400">
-              <div className="w-2 h-2 rounded-full bg-cyan-400/[0.04]0" />
+              <div className="w-2 h-2 rounded-full bg-sky-500" />
               <span><strong>Universal stages</strong> run identically for every channel</span>
             </div>
             <div className="flex items-center gap-2 text-xs text-slate-400">
-              <div className="w-2 h-2 rounded-full bg-amber-400/[0.05]0" />
+              <div className="w-2 h-2 rounded-full bg-amber-500" />
               <span><strong>Extension points</strong> are overridden when a channel-specific flow is active</span>
             </div>
             <div className="flex items-center gap-2 text-xs text-slate-400">
-              <div className="w-2 h-2 rounded-full bg-emerald-400/[0.045]0" />
+              <div className="w-2 h-2 rounded-full bg-emerald-500" />
               <span><strong>Fallback</strong> disables overrides and runs the universal baseline</span>
             </div>
           </div>
