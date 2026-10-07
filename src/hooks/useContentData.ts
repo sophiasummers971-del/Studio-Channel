@@ -1,6 +1,5 @@
 import { useEffect, useState, useCallback } from 'react';
 import { supabase } from '@/lib/supabase';
-import { MOCK_CONTENT } from '@/data/mockContent';
 import type { ContentItem, ContentStatus, PlatformId, ContentStage, ContentInput, ContentOutput } from '@/types';
 
 interface DbRow {
@@ -34,7 +33,7 @@ function mapRow(row: DbRow): ContentItem {
 }
 
 export function useContentData() {
-  const [content, setContent] = useState<ContentItem[]>(MOCK_CONTENT);
+  const [content, setContent] = useState<ContentItem[]>([]);
   const [dbLive, setDbLive] = useState(false);
   const [loading, setLoading] = useState(true);
 
@@ -46,12 +45,10 @@ export function useContentData() {
           .select('*')
           .order('created_at', { ascending: false });
         if (error) throw error;
-        if (data && data.length > 0) {
-          setContent(data.map(mapRow));
-          setDbLive(true);
-        }
+        setContent((data || []).map(mapRow));
+        setDbLive(true);
       } catch {
-        // DB unreachable — keep mock data.
+        // DB unreachable — keep the last known in-memory state.
       } finally {
         setLoading(false);
       }
