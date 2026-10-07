@@ -130,3 +130,13 @@ using (
     where so.user_id = (select auth.uid())
   )
 );
+
+
+create index if not exists idx_content_items_media_asset
+  on public.content_items(media_asset_id);
+
+create index if not exists idx_media_assets_content
+  on public.media_assets(content_id);
+
+create index if not exists idx_media_assets_uploaded_by
+  on public.media_assets(uploaded_by);
