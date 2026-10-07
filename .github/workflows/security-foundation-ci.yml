@@ -3,8 +3,7 @@ name: Studio security foundation CI
 on:
   push:
     branches:
-      - codex/studio-security-foundation
-      - codex/studio-ancient-cyber-theme
+      - 'codex/**'
   workflow_dispatch:
 
 permissions:
