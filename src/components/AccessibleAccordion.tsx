@@ -22,7 +22,7 @@ export function AccessibleAccordion({
   const buttonId = `${id}-button`;
 
   return (
-    <div className="bg-white border border-slate-200 rounded-xl overflow-hidden">
+    <div className="bg-[#0b1118] border border-[#1b2935] rounded-xl overflow-hidden">
       <div className="flex items-center">
         <button
           type="button"
@@ -30,7 +30,7 @@ export function AccessibleAccordion({
           aria-expanded={expanded}
           aria-controls={panelId}
           onClick={onToggle}
-          className="flex-1 flex items-center gap-3 px-4 py-3 text-left hover:bg-slate-50 transition-colors focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-sky-400"
+          className="flex-1 flex items-center gap-3 px-4 py-3 text-left hover:bg-[#070b10] transition-colors focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-sky-400"
         >
           <ChevronDown
             size={16}
@@ -38,7 +38,7 @@ export function AccessibleAccordion({
               expanded ? 'rotate-0' : '-rotate-90'
             }`}
           />
-          <span className="text-sm font-semibold text-slate-800">{headerLabel}</span>
+          <span className="text-sm font-semibold text-slate-200">{headerLabel}</span>
           {headerBadges}
         </button>
       </div>
