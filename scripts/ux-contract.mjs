@@ -4,6 +4,7 @@ import { readFileSync } from 'node:fs';
 const read = (path) => readFileSync(path, 'utf8');
 const sidebar = read('src/components/Sidebar.tsx');
 const dashboard = read('src/views/DashboardHome.tsx');
+const contentHook = read('src/hooks/useContentData.ts');
 const topbar = read('src/components/TopBar.tsx');
 const app = read('src/App.tsx');
 
@@ -23,6 +24,10 @@ assert.match(dashboard, /useContentData/,
   'Home dashboard must use the real content data hook');
 assert.match(dashboard, /useAccountConnections/,
   'Home dashboard must expose actual account connection status');
+assert.doesNotMatch(contentHook, /MOCK_CONTENT/,
+  'live content hook must never substitute mock rows for an empty or unavailable production database');
+assert.match(contentHook, /useState<ContentItem\[\]>\(\[\]\)/,
+  'live content state must start empty rather than with demo rows');
 
 assert.match(topbar, /onNewContent/,
   'top bar must accept a working new-content action');
