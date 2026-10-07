@@ -46,67 +46,73 @@ export function useApprovalPersistence() {
   const [loading, setLoading] = useState(true);
   const [dbReady, setDbReady] = useState(false);
 
-  // Load from Supabase on mount
-  useEffect(() => {
-    (async () => {
-      try {
-        const { data: batchRows, error: batchErr } = await supabase
-          .from('approval_batches')
-          .select('*')
-          .order('created_at', { ascending: false });
+  const loadBatches = useCallback(async () => {
+    const { data: batchRows, error: batchErr } = await supabase
+      .from('approval_batches')
+      .select('*')
+      .order('created_at', { ascending: false });
 
-        if (batchErr) throw batchErr;
+    if (batchErr) {
+      setDbReady(false);
+      throw new Error(batchErr.message);
+    }
 
-        const { data: itemRows, error: itemErr } = await supabase
-          .from('approval_items')
-          .select('*');
+    const { data: itemRows, error: itemErr } = await supabase
+      .from('approval_items')
+      .select('*');
 
-        if (itemErr) throw itemErr;
+    if (itemErr) {
+      setDbReady(false);
+      throw new Error(itemErr.message);
+    }
 
-        if (batchRows && batchRows.length > 0) {
-          const itemsByBatch = new Map<string, DbItem[]>();
-          for (const row of itemRows || []) {
-            if (!itemsByBatch.has(row.batch_id)) itemsByBatch.set(row.batch_id, []);
-            itemsByBatch.get(row.batch_id)!.push(row);
-          }
+    const itemsByBatch = new Map<string, DbItem[]>();
+    for (const row of itemRows || []) {
+      if (!itemsByBatch.has(row.batch_id)) itemsByBatch.set(row.batch_id, []);
+      itemsByBatch.get(row.batch_id)!.push(row);
+    }
 
-          const mapped = batchRows.map((b) => mapBatch(b, itemsByBatch.get(b.id) || []));
-          setBatches(mapped);
-          setDbReady(true);
-        }
-      } catch {
-        setDbReady(false);
-      } finally {
-        setLoading(false);
-      }
-    })();
+    const mapped = (batchRows || []).map((b) => mapBatch(b, itemsByBatch.get(b.id) || []));
+    setBatches(mapped);
+    setDbReady(true);
+    return mapped;
   }, []);
+
+  // Load from Supabase on mount.
+  useEffect(() => {
+    void loadBatches()
+      .catch(() => undefined)
+      .finally(() => setLoading(false));
+  }, [loadBatches]);
 
   // Persist a decision change
   const persistDecision = useCallback(
     async (batchId: string, contentId: string, decision: ApprovalDecision, reviewer: string, notes: string) => {
-      if (!dbReady) return;
+      if (!dbReady) throw new Error('Approval database is not ready.');
 
       // Find the approval_items row for this batch + content
-      try {
-        const { data: existing } = await supabase
+      {
+        const { data: existing, error: findError } = await supabase
           .from('approval_items')
           .select('id')
           .eq('batch_id', batchId)
           .eq('content_id', contentId)
-          .single();
+          .maybeSingle();
+
+        if (findError) throw new Error(findError.message);
 
         if (existing) {
-          await supabase
+          const { error: updateError } = await supabase
             .from('approval_items')
             .update({ decision, reviewer, notes })
             .eq('id', existing.id);
+          if (updateError) throw new Error(updateError.message);
         } else {
           // Find the item from the local state to get title/platform/format
           const batch = batches.find((b) => b.id === batchId);
           const item = batch?.items.find((i) => i.contentId === contentId);
           if (item) {
-            await supabase.from('approval_items').insert({
+            const { error: insertError } = await supabase.from('approval_items').insert({
               batch_id: batchId,
               content_id: contentId,
               title: item.title,
@@ -116,26 +122,29 @@ export function useApprovalPersistence() {
               reviewer,
               notes,
             });
+            if (insertError) throw new Error(insertError.message);
+          } else {
+            throw new Error('Approval item is missing from the active batch.');
           }
         }
-      } catch {
-        // Offline: local state already updated
+        await loadBatches();
       }
     },
-    [dbReady, batches]
+    [dbReady, batches, loadBatches]
   );
 
   // Close a batch and promote approved content
   const closeBatchPersistence = useCallback(
     async (batchId: string) => {
-      if (!dbReady) return;
+      if (!dbReady) throw new Error('Approval database is not ready.');
 
-      try {
+      {
         // Mark batch as closed
-        await supabase
+        const { error: closeError } = await supabase
           .from('approval_batches')
           .update({ status: 'closed' })
           .eq('id', batchId);
+        if (closeError) throw new Error(closeError.message);
 
         // Find approved items and promote to content_items
         const batch = batches.find((b) => b.id === batchId);
@@ -144,7 +153,7 @@ export function useApprovalPersistence() {
         const approved = batch.items.filter((i) => i.decision === 'approved');
         for (const item of approved) {
           // Upsert into content_items with stage='scheduled'
-          await supabase.from('content_items').upsert(
+          const { error: promoteError } = await supabase.from('content_items').upsert(
             {
               id: item.contentId,
               platform: item.platform,
@@ -158,12 +167,12 @@ export function useApprovalPersistence() {
             },
             { onConflict: 'id' }
           );
+          if (promoteError) throw new Error(promoteError.message);
         }
-      } catch {
-        // Offline: local state already updated
+        await loadBatches();
       }
     },
-    [dbReady, batches]
+    [dbReady, batches, loadBatches]
   );
 
   // Create a new batch (e.g., from generated content)
@@ -210,5 +219,5 @@ export function useApprovalPersistence() {
     []
   );
 
-  return { batches, setBatches, loading, dbReady, persistDecision, closeBatchPersistence, createBatch };
+  return { batches, setBatches, loading, dbReady, persistDecision, closeBatchPersistence, createBatch, refreshBatches: loadBatches };
 }
