@@ -56,6 +56,7 @@ export interface ContentOutput {
   pinDescription?: string;
   boardName?: string;
   altText?: string;
+  mediaUrl?: string;
 }
 
 export interface ContentItem {

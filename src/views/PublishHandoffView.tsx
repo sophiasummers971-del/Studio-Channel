@@ -23,9 +23,28 @@ const STATUS_CONFIG: Record<string, { label: string; color: string; bg: string; 
 };
 
 export function PublishHandoffView() {
-  const { scheduled, loading, publishing, publishItem, publishAll, refresh } = usePublishPipeline();
+  const { scheduled, loading, publishing, publishItem, publishAll, setPinterestMediaUrl, refresh } = usePublishPipeline();
   const [activePlatform, setActivePlatform] = useState<PlatformId | null>(null);
   const [results, setResults] = useState<Record<string, { ok: boolean; error?: string; pinLink?: string }>>({});
+  const [mediaDrafts, setMediaDrafts] = useState<Record<string, string>>({});
+  const [savingMedia, setSavingMedia] = useState<Set<string>>(new Set());
+
+  const saveMediaUrl = useCallback(async (item: ScheduledContent) => {
+    const value = (mediaDrafts[item.id] ?? item.output.mediaUrl ?? '').trim();
+    setSavingMedia((prev) => new Set(prev).add(item.id));
+    try {
+      await setPinterestMediaUrl(item, value);
+      setResults((prev) => ({ ...prev, [item.id]: { ok: false, error: value ? 'Image URL saved. Ready for publish validation.' : 'Image URL cleared.' } }));
+    } catch (error) {
+      setResults((prev) => ({ ...prev, [item.id]: { ok: false, error: error instanceof Error ? error.message : 'Could not save image URL.' } }));
+    } finally {
+      setSavingMedia((prev) => {
+        const next = new Set(prev);
+        next.delete(item.id);
+        return next;
+      });
+    }
+  }, [mediaDrafts, setPinterestMediaUrl]);
 
   const filtered = activePlatform
     ? scheduled.filter((item) => item.platform === activePlatform)
@@ -262,6 +281,28 @@ export function PublishHandoffView() {
                     </a>
                   )}
                 </div>
+
+                {item.platform === 'pinterest' && status !== 'published' && (
+                  <div className="mt-3 grid gap-2 md:grid-cols-[1fr_auto]">
+                    <input
+                      type="url"
+                      value={mediaDrafts[item.id] ?? item.output.mediaUrl ?? ''}
+                      onChange={(e) => setMediaDrafts((prev) => ({ ...prev, [item.id]: e.target.value }))}
+                      placeholder="https://example.com/image.jpg"
+                      className="w-full px-3 py-2 rounded-lg border border-[#1b2935] bg-[#070b10] text-sm text-slate-200 placeholder:text-slate-600 focus:outline-none focus:ring-2 focus:ring-cyan-500/40"
+                    />
+                    <button
+                      onClick={() => void saveMediaUrl(item)}
+                      disabled={savingMedia.has(item.id)}
+                      className="px-3 py-2 rounded-lg text-xs font-semibold bg-[#101820] text-cyan-200 border border-cyan-400/15 hover:bg-[#13202a] disabled:opacity-50"
+                    >
+                      {savingMedia.has(item.id) ? 'Saving…' : 'Save image URL'}
+                    </button>
+                    <p className="md:col-span-2 text-[11px] text-slate-500">
+                      Pinterest publishing requires a public HTTPS image URL. Thumbnail concept text is never used as media.
+                    </p>
+                  </div>
+                )}
 
                 {/* Error message */}
                 {job?.errorMessage && status === 'failed' && (

@@ -139,9 +139,40 @@ export function usePublishPipeline() {
     []
   );
 
+  const setPinterestMediaUrl = useCallback(async (item: ScheduledContent, mediaUrl: string) => {
+    const trimmed = mediaUrl.trim();
+    const nextOutput = { ...(item.output || {}), mediaUrl: trimmed };
+
+    const { error } = await supabase
+      .from('content_items')
+      .update({ output: nextOutput, updated_at: new Date().toISOString() })
+      .eq('id', item.id);
+
+    if (error) throw error;
+    await loadData();
+  }, [loadData]);
+
   // Publish a single item via the Edge Function
   const publishItem = useCallback(
     async (item: ScheduledContent) => {
+      const output = item.output || {};
+      const mediaUrl = typeof output.mediaUrl === 'string' ? output.mediaUrl.trim() : '';
+
+      if (item.platform === 'pinterest') {
+        if (!mediaUrl) {
+          return { ok: false, error: 'Pinterest requires a public HTTPS image URL before publishing.' };
+        }
+
+        try {
+          const parsed = new URL(mediaUrl);
+          if (parsed.protocol !== 'https:') {
+            return { ok: false, error: 'Pinterest media URL must use HTTPS.' };
+          }
+        } catch {
+          return { ok: false, error: 'Pinterest media URL is not a valid URL.' };
+        }
+      }
+
       if (!item.publishJob && item.platform === 'pinterest') {
         // Create job first
         const job = await createPublishJob(item.id, item.platform);
@@ -155,7 +186,6 @@ export function usePublishPipeline() {
       setPublishing((prev) => new Set(prev).add(item.id));
 
       try {
-        const output = item.output || {};
         const { data, error } = await supabase.functions.invoke('publish-pin', {
           body: {
             jobId: job.id,
@@ -166,7 +196,7 @@ export function usePublishPipeline() {
             boardName: output.boardName || 'Channel Studio Pins',
             caption: output.caption || '',
             hashtags: output.hashtags || [],
-            imageUrl: output.thumbnailConcept || undefined,
+            imageUrl: mediaUrl || undefined,
             link: undefined,
           },
         });
@@ -219,5 +249,5 @@ export function usePublishPipeline() {
     [scheduled, publishItem]
   );
 
-  return { scheduled, publishJobs, loading, publishing, publishItem, publishAll, refresh: loadData };
+  return { scheduled, publishJobs, loading, publishing, publishItem, publishAll, setPinterestMediaUrl, refresh: loadData };
 }
