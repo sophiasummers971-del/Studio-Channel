@@ -72,6 +72,7 @@ begin
   end loop;
 end $$;
 
+-- Account connection metadata is read-only from the browser.
 do $$
 declare
   pol record;
@@ -98,9 +99,12 @@ create policy "operator_select_account_connections"
     where so.user_id = (select auth.uid())
   ));
 
+-- OAuth secrets and anti-forgery state remain service-role only.
 revoke all on table public.oauth_credentials from anon, authenticated;
 revoke all on table public.oauth_states from anon, authenticated;
 
+
+-- Bind each OAuth authorization attempt to the operator who initiated it.
 alter table public.oauth_states
   add column if not exists user_id uuid references auth.users(id) on delete cascade;
 
