@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { corsHeaders } from "../_shared/cors.ts";
+import { operatorErrorResponse, requireOperator } from "../_shared/requireOperator.ts";
 
 const OPENAI_API_KEY = Deno.env.get("OPENAI_API_KEY");
 
@@ -70,6 +71,8 @@ serve(async (req: Request) => {
   }
 
   try {
+    await requireOperator(req);
+
     if (!OPENAI_API_KEY) {
       return new Response(
         JSON.stringify({ error: "OPENAI_API_KEY not configured in Supabase secrets. Set it with: supabase secrets set OPENAI_API_KEY=sk-..." }),
@@ -153,6 +156,9 @@ serve(async (req: Request) => {
       { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   } catch (err) {
+    const authResponse = operatorErrorResponse(err, corsHeaders);
+    if (authResponse) return authResponse;
+
     console.error("generate-content error:", err);
     return new Response(
       JSON.stringify({ error: "Internal error" }),
