@@ -72,6 +72,10 @@ assert.doesNotMatch(deployWorkflow, /VITE_APP_PASSWORD/,
   'Cloudflare deployment must not inject an obsolete client password');
 assert.doesNotMatch(securityWorkflow, /VITE_APP_PASSWORD/,
   'security CI must not inject an obsolete client password');
+assert.ok(
+  !existsSync('.github/workflows/deploy.yml'),
+  'Studio must have a single production deployment path; GitHub Pages deploy must remain removed'
+);
 
 assert.ok(
   existsSync('supabase/functions/_shared/requireOperator.ts'),
