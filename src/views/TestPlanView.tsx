@@ -100,7 +100,7 @@ export function TestPlanView({ testPlan, onNavigateToGate }: TestPlanViewProps) 
           className={`flex items-center gap-2 px-5 py-2.5 text-sm font-medium rounded-lg transition-all shadow-sm ${
             running
               ? 'bg-slate-200 text-slate-400 cursor-not-allowed'
-              : 'bg-cyan-400/[0.04]0 text-white hover:bg-sky-600 hover:shadow-md'
+              : 'bg-sky-500 text-white hover:bg-sky-600 hover:shadow-md'
           }`}
         >
           {running ? <Loader2 size={16} className="animate-spin" /> : <PlayCircle size={16} />}
