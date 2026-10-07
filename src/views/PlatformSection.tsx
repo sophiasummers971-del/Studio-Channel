@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { MOCK_CONTENT } from '@/data/mockContent';
+import { useContentData } from '@/hooks/useContentData';
 import { PLATFORMS, CONTENT_FORMATS, getPlatform, getFormat } from '@/data/platforms';
 import type { PlatformId, ContentFormatId, ContentItem } from '@/types';
 import { ContentCard } from '@/components/ContentCard';
@@ -30,15 +30,21 @@ interface PlatformSectionProps {
 
 export function PlatformSection({ platformId, onBack, onItemClick }: PlatformSectionProps) {
   const platform = getPlatform(platformId);
+  const { content, loading, dbLive } = useContentData();
   const [activeFormat, setActiveFormat] = useState<ContentFormatId | 'all'>('all');
 
+  const platformContent = useMemo(
+    () => content.filter((item) => item.platform === platformId),
+    [content, platformId]
+  );
+
   const filteredContent = useMemo(() => {
-    return MOCK_CONTENT.filter((c) => {
+    return platformContent.filter((c) => {
       if (c.platform !== platformId) return false;
       if (activeFormat !== 'all' && c.format !== activeFormat) return false;
       return true;
     });
-  }, [platformId, activeFormat]);
+  }, [platformContent, platformId, activeFormat]);
 
   if (!platform) return null;
 
@@ -86,7 +92,7 @@ export function PlatformSection({ platformId, onBack, onItemClick }: PlatformSec
         >
           All Content
           <span className="ml-1.5 text-xs text-slate-400">
-            {MOCK_CONTENT.filter((c) => c.platform === platformId).length}
+            {platformContent.length}
           </span>
           {activeFormat === 'all' && (
             <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-slate-900 rounded-full" />
@@ -94,9 +100,7 @@ export function PlatformSection({ platformId, onBack, onItemClick }: PlatformSec
         </button>
         {formatTabs.map((fmt) => {
           const Icon = FORMAT_ICONS[fmt.icon] || ImageIcon;
-          const count = MOCK_CONTENT.filter(
-            (c) => c.platform === platformId && c.format === fmt.id
-          ).length;
+          const count = platformContent.filter((c) => c.format === fmt.id).length;
           const isActive = activeFormat === fmt.id;
           return (
             <button
@@ -138,7 +142,15 @@ export function PlatformSection({ platformId, onBack, onItemClick }: PlatformSec
         </div>
       )}
 
-      {filteredContent.length === 0 ? (
+      {!dbLive && !loading && (
+        <div className="mb-5 rounded-xl border border-amber-400/20 bg-amber-400/[0.05] px-4 py-3 text-sm text-amber-200">
+          Live content data is unavailable. No demo content is substituted.
+        </div>
+      )}
+
+      {loading ? (
+        <div className="py-20 text-center text-sm text-slate-500">Loading live content…</div>
+      ) : filteredContent.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-20 text-center">
           <div className="w-16 h-16 rounded-full bg-[#101820] flex items-center justify-center mb-4">
             <Plus size={28} className="text-slate-400" />
