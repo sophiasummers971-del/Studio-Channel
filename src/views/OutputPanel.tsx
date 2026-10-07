@@ -40,6 +40,10 @@ export function OutputPanel() {
         </p>
       </div>
 
+      <div className="mb-5 rounded-xl border border-cyan-400/15 bg-cyan-400/[0.04] px-4 py-3 text-xs text-cyan-100/75">
+        REFERENCE ONLY: this page documents the schema. Any sample values shown below come from bundled demo data and are not production status.
+      </div>
+
       <div className="grid grid-cols-1 gap-3 mb-6">
         {OUTPUT_FIELDS.map((field) => {
           const Icon = field.icon;
