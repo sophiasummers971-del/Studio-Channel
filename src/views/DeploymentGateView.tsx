@@ -75,7 +75,7 @@ export function DeploymentGateView({ testPlan }: DeploymentGateViewProps) {
   return (
     <div className="p-8 max-w-6xl mx-auto">
       <div className="mb-6">
-        <h2 className="text-2xl font-bold text-slate-900 mb-1">Deployment Gate</h2>
+        <h2 className="text-2xl font-bold text-slate-100 mb-1">Deployment Gate</h2>
         <p className="text-sm text-slate-500">
           Confirm deployment readiness. The gate opens only when all critical tests pass, blockers
           are resolved, and the required checklist is complete.
@@ -86,8 +86,8 @@ export function DeploymentGateView({ testPlan }: DeploymentGateViewProps) {
       <div
         className={`rounded-xl border p-5 mb-6 transition-all ${
           canDeploy
-            ? 'bg-emerald-50 border-emerald-300'
-            : 'bg-amber-50 border-amber-300'
+            ? 'bg-emerald-400/[0.045] border-emerald-300'
+            : 'bg-amber-400/[0.05] border-amber-300'
         }`}
       >
         <div className="flex items-center gap-4">
@@ -97,18 +97,18 @@ export function DeploymentGateView({ testPlan }: DeploymentGateViewProps) {
             }`}
           >
             {canDeploy ? (
-              <ShieldCheck size={24} className="text-emerald-600" />
+              <ShieldCheck size={24} className="text-emerald-400" />
             ) : (
               <ShieldAlert size={24} className="text-amber-600" />
             )}
           </div>
           <div className="flex-1">
-            <h3 className={`text-sm font-semibold ${canDeploy ? 'text-emerald-800' : 'text-amber-800'}`}>
+            <h3 className={`text-sm font-semibold ${canDeploy ? 'text-emerald-800' : 'text-amber-200/80'}`}>
               {canDeploy
                 ? 'Deployment Ready — All gates passed'
                 : 'Not Ready — Complete remaining requirements'}
             </h3>
-            <p className={`text-xs mt-0.5 ${canDeploy ? 'text-emerald-600' : 'text-amber-600'}`}>
+            <p className={`text-xs mt-0.5 ${canDeploy ? 'text-emerald-400' : 'text-amber-600'}`}>
               {canDeploy
                 ? 'The universal baseline workflow has passed validation and is cleared for deployment.'
                 : `${requiredCount - requiredChecked} required checklist items pending, ${openBlockers.length} blocker(s) to resolve before deployment.`}
@@ -118,9 +118,9 @@ export function DeploymentGateView({ testPlan }: DeploymentGateViewProps) {
       </div>
 
       {/* Checklist */}
-      <div className="bg-white border border-slate-200 rounded-xl overflow-hidden">
-        <div className="bg-slate-50 px-5 py-3 border-b border-slate-200">
-          <h3 className="text-sm font-semibold text-slate-700">Deployment Checklist</h3>
+      <div className="bg-[#0b1118] border border-[#1b2935] rounded-xl overflow-hidden">
+        <div className="bg-[#070b10] px-5 py-3 border-b border-[#1b2935]">
+          <h3 className="text-sm font-semibold text-slate-300">Deployment Checklist</h3>
           <p className="text-xs text-slate-400 mt-0.5">
             {requiredChecked} of {requiredCount} required items complete
           </p>
@@ -132,13 +132,13 @@ export function DeploymentGateView({ testPlan }: DeploymentGateViewProps) {
               onClick={() => toggleChecklistItem(item.id)}
               className={`w-full text-left flex items-start gap-3 px-3 py-2.5 rounded-lg transition-all ${
                 item.checked
-                  ? 'bg-emerald-50/50 border border-emerald-100'
-                  : 'bg-slate-50 border border-slate-100 hover:bg-slate-100'
+                  ? 'bg-emerald-400/[0.045]/50 border border-emerald-400/10'
+                  : 'bg-[#070b10] border border-[#14202a] hover:bg-[#101820]'
               }`}
             >
               <div
                 className={`w-5 h-5 rounded-md flex items-center justify-center shrink-0 mt-0.5 transition-all ${
-                  item.checked ? 'bg-emerald-500' : 'bg-white border border-slate-300'
+                  item.checked ? 'bg-emerald-400/[0.045]0' : 'bg-[#0b1118] border border-slate-300'
                 }`}
               >
                 {item.checked ? (
@@ -149,7 +149,7 @@ export function DeploymentGateView({ testPlan }: DeploymentGateViewProps) {
               </div>
               <div className="flex-1">
                 <div className="flex items-center gap-2">
-                  <p className={`text-sm font-medium ${item.checked ? 'text-slate-700' : 'text-slate-600'}`}>
+                  <p className={`text-sm font-medium ${item.checked ? 'text-slate-300' : 'text-slate-400'}`}>
                     {item.label}
                   </p>
                   {item.required ? (
@@ -158,7 +158,7 @@ export function DeploymentGateView({ testPlan }: DeploymentGateViewProps) {
                       Required
                     </span>
                   ) : (
-                    <span className="flex items-center gap-0.5 text-[9px] font-medium text-slate-400 bg-slate-100 px-1.5 py-0.5 rounded-full">
+                    <span className="flex items-center gap-0.5 text-[9px] font-medium text-slate-400 bg-[#101820] px-1.5 py-0.5 rounded-full">
                       <Unlock size={8} />
                       Optional
                     </span>
@@ -173,8 +173,8 @@ export function DeploymentGateView({ testPlan }: DeploymentGateViewProps) {
 
       {/* Issues Found */}
       <div className="mb-6">
-        <h3 className="text-sm font-semibold text-slate-700 mb-3">Issues Found During Validation</h3>
-        <div className="bg-white border border-slate-200 rounded-xl overflow-hidden">
+        <h3 className="text-sm font-semibold text-slate-300 mb-3">Issues Found During Validation</h3>
+        <div className="bg-[#0b1118] border border-[#1b2935] rounded-xl overflow-hidden">
           {issues.length === 0 ? (
             <div className="flex items-center justify-center py-8 text-sm text-slate-400">
               <CheckCircle2 size={18} className="mr-2 text-emerald-400" />
@@ -187,7 +187,7 @@ export function DeploymentGateView({ testPlan }: DeploymentGateViewProps) {
                 const statusCfg = STATUS_BADGE[issue.status];
                 const stage = getWorkflowStage(issue.affectedStage);
                 return (
-                  <div key={issue.id} className="px-5 py-4 hover:bg-slate-50/50 transition-colors">
+                  <div key={issue.id} className="px-5 py-4 hover:bg-[#070b10]/50 transition-colors">
                     <div className="flex items-start gap-3">
                       <div
                         className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0"
@@ -210,7 +210,7 @@ export function DeploymentGateView({ testPlan }: DeploymentGateViewProps) {
                             {statusCfg.label}
                           </span>
                           {stage && (
-                            <span className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-slate-100 text-slate-600">
+                            <span className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-[#101820] text-slate-400">
                               {stage.label}
                             </span>
                           )}
@@ -230,15 +230,15 @@ export function DeploymentGateView({ testPlan }: DeploymentGateViewProps) {
 
       {/* Summary Stats */}
       <div className="grid grid-cols-3 gap-4 mb-6">
-        <div className="bg-white border border-slate-200 rounded-xl p-4 text-center">
+        <div className="bg-[#0b1118] border border-[#1b2935] rounded-xl p-4 text-center">
           <span className="text-2xl font-bold text-sky-600">{passCount}</span>
           <p className="text-xs text-slate-500 mt-1">Passed</p>
         </div>
-        <div className="bg-white border border-slate-200 rounded-xl p-4 text-center">
+        <div className="bg-[#0b1118] border border-[#1b2935] rounded-xl p-4 text-center">
           <span className="text-2xl font-bold text-amber-600">{warningCount}</span>
           <p className="text-xs text-slate-500 mt-1">Warnings</p>
         </div>
-        <div className="bg-white border border-slate-200 rounded-xl p-4 text-center">
+        <div className="bg-[#0b1118] border border-[#1b2935] rounded-xl p-4 text-center">
           <span className="text-2xl font-bold text-red-600">{failCount}</span>
           <p className="text-xs text-slate-500 mt-1">Failed</p>
         </div>
@@ -246,7 +246,7 @@ export function DeploymentGateView({ testPlan }: DeploymentGateViewProps) {
 
       {/* Gate Conditions */}
       <div className="mb-6">
-        <h3 className="text-sm font-semibold text-slate-700 mb-3">Gate Conditions</h3>
+        <h3 className="text-sm font-semibold text-slate-300 mb-3">Gate Conditions</h3>
         <div className="grid grid-cols-2 gap-3">
           <GateCondition label="All tests run" passed={allTestsRun} detail="Every test scenario must be executed at least once." />
           <GateCondition label="Critical tests passed" passed={criticalTestsPassed} detail="All critical-weight tests must show 'passed' status." />
@@ -281,8 +281,8 @@ function GateCondition({ label, passed, detail }: { label: string; passed: boole
     <div
       className={`flex items-start gap-3 p-3 rounded-lg border transition-all ${
         passed
-          ? 'bg-emerald-50/50 border-emerald-100'
-          : 'bg-amber-50/50 border-amber-100'
+          ? 'bg-emerald-400/[0.045]/50 border-emerald-400/10'
+          : 'bg-amber-400/[0.05]/50 border-amber-400/10'
       }`}
     >
       <div
@@ -291,16 +291,16 @@ function GateCondition({ label, passed, detail }: { label: string; passed: boole
         }`}
       >
         {passed ? (
-          <CheckCircle2 size={15} className="text-emerald-600" />
+          <CheckCircle2 size={15} className="text-emerald-400" />
         ) : (
           <Circle size={15} className="text-amber-500" />
         )}
       </div>
       <div>
-        <p className={`text-xs font-semibold ${passed ? 'text-emerald-800' : 'text-amber-800'}`}>
+        <p className={`text-xs font-semibold ${passed ? 'text-emerald-800' : 'text-amber-200/80'}`}>
           {label}
         </p>
-        <p className={`text-[11px] mt-0.5 ${passed ? 'text-emerald-600' : 'text-amber-600'}`}>
+        <p className={`text-[11px] mt-0.5 ${passed ? 'text-emerald-400' : 'text-amber-600'}`}>
           {detail}
         </p>
       </div>
