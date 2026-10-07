@@ -88,8 +88,12 @@ export function AuthGate({ children }: { children: ReactNode }) {
   if (gateState === 'authorized') return <>{children}</>;
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-slate-950 px-6">
-      <div className="w-full max-w-md rounded-2xl border border-slate-800 bg-slate-900 p-8 shadow-2xl">
+    <div className="relative min-h-screen flex items-center justify-center bg-[#030507] px-6 overflow-hidden">
+      <div className="absolute inset-0 pointer-events-none overflow-hidden">
+        <div className="absolute left-1/2 top-[-14rem] h-[34rem] w-[34rem] -translate-x-1/2 rounded-full bg-cyan-400/[0.035] blur-3xl" />
+        <div className="absolute right-[-10rem] bottom-[-10rem] h-[26rem] w-[26rem] rounded-full bg-violet-500/[0.035] blur-3xl" />
+      </div>
+      <div className="relative z-10 w-full max-w-md rounded-2xl border border-[#1b2b37] bg-[#091017]/95 p-8 shadow-[0_30px_100px_rgba(0,0,0,0.55)]">
         <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-full bg-violet-700">
           {gateState === 'unauthorized' ? (
             <ShieldX size={30} className="text-white" />
@@ -98,7 +102,7 @@ export function AuthGate({ children }: { children: ReactNode }) {
           )}
         </div>
 
-        <h1 className="text-center text-2xl font-bold text-slate-100">Channel Studio</h1>
+        <p className="studio-kicker mb-2 text-center">SECURE OPERATOR ACCESS</p>\n        <h1 className="text-center text-2xl font-bold text-slate-100">Channel Studio</h1>
 
         {gateState === 'loading' && (
           <p className="mt-3 text-center text-sm text-slate-400">Checking secure workspace access…</p>
@@ -116,11 +120,11 @@ export function AuthGate({ children }: { children: ReactNode }) {
                 onChange={(event) => setEmail(event.target.value)}
                 placeholder="you@example.com"
                 autoComplete="email"
-                className="w-full rounded-xl border border-slate-700 bg-slate-800 px-4 py-3 text-slate-100 outline-none focus:border-violet-500"
+                className="studio-input w-full px-4 py-3 text-slate-100"
               />
               <button
                 type="submit"
-                className="w-full flex items-center justify-center gap-2 rounded-xl bg-violet-700 px-4 py-3 text-sm font-semibold text-white hover:bg-violet-600"
+                className="w-full flex items-center justify-center gap-2 rounded-xl bg-cyan-400/10 border border-cyan-400/20 px-4 py-3 text-sm font-semibold text-cyan-200 hover:bg-cyan-400/15"
               >
                 <LogIn size={16} />
                 Send magic link
@@ -143,7 +147,7 @@ export function AuthGate({ children }: { children: ReactNode }) {
             <button
               type="button"
               onClick={signOut}
-              className="w-full flex items-center justify-center gap-2 rounded-xl bg-slate-800 px-4 py-3 text-sm font-semibold text-slate-200 hover:bg-slate-700"
+              className="w-full flex items-center justify-center gap-2 rounded-xl bg-white/[0.035] border border-white/[0.05] px-4 py-3 text-sm font-semibold text-slate-200 hover:bg-white/[0.06]"
             >
               <LogOut size={16} />
               Sign out
