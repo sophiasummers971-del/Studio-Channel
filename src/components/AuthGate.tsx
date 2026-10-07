@@ -67,7 +67,7 @@ export function AuthGate({ children }: { children: ReactNode }) {
       email: address,
       options: {
         emailRedirectTo: window.location.origin,
-        shouldCreateUser: false,
+        shouldCreateUser: true,
       },
     });
 
@@ -107,7 +107,7 @@ export function AuthGate({ children }: { children: ReactNode }) {
         {gateState === 'signed-out' && (
           <>
             <p className="mt-3 text-center text-sm text-slate-400">
-              Sign in with the email account that has been granted Studio operator access.
+              Sign in with your Studio email. New identities can be created here, but access stays locked until that user is added to the Studio operator allowlist.
             </p>
             <form onSubmit={requestMagicLink} className="mt-7 space-y-4">
               <input
