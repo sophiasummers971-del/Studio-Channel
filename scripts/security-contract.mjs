@@ -88,6 +88,7 @@ assert.match(operatorAuth, /studio_operators/,
   'Edge Function authorization must verify Studio operator membership');
 
 const publishPin = read('supabase/functions/publish-pin/index.ts');
+const publishLinkedIn = read('supabase/functions/publish-linkedin/index.ts');
 const generateContent = read('supabase/functions/generate-content/index.ts');
 assert.match(authStart, /requireOperator/,
   'auth_start must require an authorized Studio operator');
@@ -107,6 +108,8 @@ assert.match(functionConfig, /\[functions\.auth_callback\][\s\S]*verify_jwt\s*=\
   'auth_callback must remain callable by provider redirect and rely on one-time state');
 assert.match(functionConfig, /\[functions\."?publish-pin"?\][\s\S]*verify_jwt\s*=\s*true/,
   'publish-pin must require JWT verification');
+assert.match(functionConfig, /\[functions\."?publish-linkedin"?\][\s\S]*verify_jwt\s*=\s*true/,
+  'publish-linkedin must require JWT verification');
 assert.match(functionConfig, /\[functions\."?generate-content"?\][\s\S]*verify_jwt\s*=\s*true/,
   'generate-content must require JWT verification');
 
@@ -120,14 +123,26 @@ assert.match(generateClient, /functions\.invoke\(['"]generate-content['"]/,
 
 assert.doesNotMatch(publishClient, /VITE_SUPABASE_ANON_KEY/,
   'publishing must not authenticate privileged functions with the public anon key');
-assert.match(publishClient, /functions\.invoke\(['"]publish-pin['"]/,
+assert.match(publishClient, /supabase\.functions\.invoke\(functionName/,
   'publishing must use the authenticated Supabase function client');
+assert.match(publishClient, /publish-linkedin/,
+  'publishing client must route LinkedIn to its dedicated Edge Function');
+assert.match(publishClient, /publish-pin/,
+  'publishing client must preserve Pinterest routing');
 assert.doesNotMatch(publishClient, /imageUrl:\s*output\.thumbnailConcept/,
   'Pinterest publishing must never use thumbnail concept text as media');
 assert.match(publishClient, /output\.mediaUrl/,
   'Pinterest publishing must use a dedicated media URL field');
 assert.match(publishPin, /Pinterest media URL must use HTTPS/,
   'publish-pin must enforce HTTPS media URLs server-side');
+assert.match(publishLinkedIn, /requireOperator/,
+  'publish-linkedin must require an authorized Studio operator');
+assert.match(publishLinkedIn, /oauth_credentials/,
+  'publish-linkedin must read LinkedIn credentials only from the server-side credential store');
+assert.match(publishLinkedIn, /LinkedIn media URL must use HTTPS/,
+  'publish-linkedin must enforce HTTPS media URLs server-side');
+assert.match(publishLinkedIn, /api\.linkedin\.com\/v2\/ugcPosts/,
+  'publish-linkedin must use LinkedIn member publishing API');
 
 assert.match(oauthConfig, /https:\/\/www\.instagram\.com\/oauth\/authorize/,
   'Instagram must use current Instagram Business Login authorization endpoint');
