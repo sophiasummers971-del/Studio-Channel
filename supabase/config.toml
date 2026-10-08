@@ -12,6 +12,9 @@ verify_jwt = true
 [functions.publish-pin]
 verify_jwt = true
 
+[functions.publish-linkedin]
+verify_jwt = true
+
 
 [storage.buckets.studio-media-public]
 public = true

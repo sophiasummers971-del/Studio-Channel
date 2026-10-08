@@ -295,8 +295,12 @@ export function usePublishPipeline() {
         }
       }
 
-      if (!item.publishJob && item.platform === 'pinterest') {
-        // Create job first
+      const supportedPlatforms = new Set<PlatformId>(['pinterest', 'linkedin']);
+      if (!supportedPlatforms.has(item.platform)) {
+        return { ok: false, error: `Publishing for ${item.platform} is not implemented yet.` };
+      }
+
+      if (!item.publishJob) {
         const job = await createPublishJob(item.id, item.platform);
         if (!job) return { ok: false, error: 'Failed to create publish job' };
         item = { ...item, publishJob: job };
@@ -308,7 +312,8 @@ export function usePublishPipeline() {
       setPublishing((prev) => new Set(prev).add(item.id));
 
       try {
-        const { data, error } = await supabase.functions.invoke('publish-pin', {
+        const functionName = item.platform === 'linkedin' ? 'publish-linkedin' : 'publish-pin';
+        const { data, error } = await supabase.functions.invoke(functionName, {
           body: {
             jobId: job.id,
             contentId: item.id,
@@ -319,6 +324,8 @@ export function usePublishPipeline() {
             caption: output.caption || '',
             hashtags: output.hashtags || [],
             imageUrl: mediaUrl || undefined,
+            title: item.title,
+            altText: output.altText || '',
             link: undefined,
           },
         });
@@ -336,7 +343,13 @@ export function usePublishPipeline() {
 
         // Refresh job status from DB
         await loadData();
-        return { ok: true, pinId: data.pinId, pinLink: data.pinLink };
+        return {
+          ok: true,
+          externalId: data.externalId || data.pinId,
+          externalUrl: data.externalUrl || data.pinLink,
+          pinId: data.pinId,
+          pinLink: data.pinLink,
+        };
       } catch (err) {
         await loadData();
         return { ok: false, error: String(err) };

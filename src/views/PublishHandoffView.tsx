@@ -37,7 +37,7 @@ export function PublishHandoffView() {
     removeMedia,
   } = usePublishPipeline();
   const [activePlatform, setActivePlatform] = useState<PlatformId | null>(null);
-  const [results, setResults] = useState<Record<string, { ok: boolean; error?: string; pinLink?: string }>>({});
+  const [results, setResults] = useState<Record<string, { ok: boolean; error?: string; pinLink?: string; externalUrl?: string }>>({});
   const [mediaDrafts, setMediaDrafts] = useState<Record<string, string>>({});
   const [savingMedia, setSavingMedia] = useState<Set<string>>(new Set());
   const [uploadingMedia, setUploadingMedia] = useState<Set<string>>(new Set());
@@ -441,16 +441,16 @@ export function PublishHandoffView() {
                     <p className="text-xs text-rose-600">{result.error}</p>
                   </div>
                 )}
-                {result?.ok && result.pinLink && (
+                {result?.ok && (result.externalUrl || result.pinLink) && (
                   <div className="mt-2 ml-13 pl-3 border-l-2 border-emerald-400/20 flex items-center gap-2">
                     <CheckCircle2 size={13} className="text-emerald-500" />
                     <a
-                      href={result.pinLink}
+                      href={result.externalUrl || result.pinLink}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="text-xs text-emerald-400 hover:underline"
                     >
-                      View live pin
+                      View live {item.platform === 'pinterest' ? 'pin' : 'post'}
                     </a>
                   </div>
                 )}
